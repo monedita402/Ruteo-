@@ -1,3 +1,4 @@
+```python
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -6,29 +7,26 @@ import streamlit as st
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
-
 # ============================================================
 # CONFIGURACIÓN GENERAL
 # ============================================================
 
 st.set_page_config(
 
-    page_title="Logistic Intelligence System",
+    page_title="Sistema Inteligente de Logística",
     layout="wide"
 
 )
 
 # ============================================================
-# ESTILO PROFESIONAL PREMIUM
+# CSS PREMIUM
 # ============================================================
 
 st.markdown("""
 
 <style>
 
-/* =========================================================
-FONDO PRINCIPAL
-========================================================= */
+/* Fondo */
 
 .stApp {
 
@@ -37,9 +35,7 @@ FONDO PRINCIPAL
 
 }
 
-/* =========================================================
-SIDEBAR
-========================================================= */
+/* Sidebar */
 
 section[data-testid="stSidebar"] {
 
@@ -51,27 +47,20 @@ section[data-testid="stSidebar"] {
 
     border-right: 2px solid #1E293B;
 
-    padding-top: 20px;
-
 }
 
-/* =========================================================
-TEXTOS SIDEBAR
-========================================================= */
+/* Textos sidebar */
 
 section[data-testid="stSidebar"] label,
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] span,
 section[data-testid="stSidebar"] div {
 
-    color: #F8FAFC !important;
-    font-weight: 500;
+    color: white !important;
 
 }
 
-/* =========================================================
-SELECTBOX
-========================================================= */
+/* Selectbox */
 
 .stSelectbox div[data-baseweb="select"] {
 
@@ -83,27 +72,17 @@ SELECTBOX
 
 }
 
-/* Texto selectbox */
-
 .stSelectbox div[data-baseweb="select"] span {
 
     color: white !important;
 
 }
 
-/* Dropdown */
-
 div[role="listbox"] {
 
     background-color: #1E293B !important;
 
-    color: white !important;
-
-    border-radius: 10px !important;
-
 }
-
-/* Opciones dropdown */
 
 div[role="option"] {
 
@@ -111,17 +90,13 @@ div[role="option"] {
 
 }
 
-/* Hover opciones */
-
 div[role="option"]:hover {
 
     background-color: #2563EB !important;
 
 }
 
-/* =========================================================
-INPUTS NUMBER
-========================================================= */
+/* Inputs */
 
 .stNumberInput input {
 
@@ -131,13 +106,9 @@ INPUTS NUMBER
 
     border-radius: 10px !important;
 
-    border: 1px solid #334155 !important;
-
 }
 
-/* =========================================================
-TÍTULOS
-========================================================= */
+/* Títulos */
 
 h1 {
 
@@ -153,13 +124,9 @@ h2, h3 {
 
     color: #60A5FA !important;
 
-    font-weight: 700 !important;
-
 }
 
-/* =========================================================
-KPIs
-========================================================= */
+/* KPIs */
 
 div[data-testid="metric-container"] {
 
@@ -169,39 +136,43 @@ div[data-testid="metric-container"] {
         #0F172A
     );
 
-    border: 1px solid #334155;
+    border: 2px solid #475569;
 
-    padding: 25px;
+    padding: 28px;
 
-    border-radius: 18px;
+    border-radius: 20px;
 
-    box-shadow: 0px 6px 18px rgba(0,0,0,0.45);
+    box-shadow:
+        0px 6px 18px rgba(0,0,0,0.45),
+        0px 0px 12px rgba(96,165,250,0.15);
 
 }
 
-/* KPI LABEL */
+/* KPI Texto */
 
 div[data-testid="metric-container"] label {
 
-    color: #CBD5E1 !important;
+    color: white !important;
+
+    font-size: 20px !important;
+
+    font-weight: 800 !important;
 
 }
 
-/* KPI VALUE */
+/* KPI Valor */
 
 div[data-testid="metric-container"] div {
 
-    color: white !important;
+    color: #F8FAFC !important;
 
-    font-size: 30px !important;
+    font-size: 42px !important;
 
-    font-weight: bold !important;
+    font-weight: 900 !important;
 
 }
 
-/* =========================================================
-TABLAS
-========================================================= */
+/* Tabla */
 
 [data-testid="stDataFrame"] {
 
@@ -209,49 +180,9 @@ TABLAS
 
     overflow: hidden;
 
-    border: 1px solid #334155;
-
 }
 
-/* =========================================================
-BOTONES
-========================================================= */
-
-.stButton>button {
-
-    background: linear-gradient(
-        135deg,
-        #2563EB,
-        #1D4ED8
-    );
-
-    color: white;
-
-    border-radius: 12px;
-
-    border: none;
-
-    padding: 12px 20px;
-
-    font-weight: bold;
-
-}
-
-/* Hover botón */
-
-.stButton>button:hover {
-
-    background: linear-gradient(
-        135deg,
-        #1D4ED8,
-        #1E40AF
-    );
-
-}
-
-/* =========================================================
-ALERTAS
-========================================================= */
+/* Alertas */
 
 .stAlert {
 
@@ -264,7 +195,7 @@ ALERTAS
 """, unsafe_allow_html=True)
 
 # ============================================================
-# SELECTOR DE IDIOMA
+# IDIOMA
 # ============================================================
 
 idioma = st.sidebar.selectbox(
@@ -281,7 +212,7 @@ idioma = st.sidebar.selectbox(
 )
 
 # ============================================================
-# TEXTOS DINÁMICOS
+# TEXTOS
 # ============================================================
 
 if idioma == "Español":
@@ -290,19 +221,15 @@ if idioma == "Español":
 
     SUBTITULO = "Optimización Avanzada de Transporte y Rutas"
 
-    CONFIG = "⚙️ Configuración de Simulación"
+    CONFIG = "⚙️ Configuración"
 
     VEHICULOS = "Cantidad de Vehículos"
 
-    CAPACIDAD = "Capacidad del Vehículo (kg)"
+    CAPACIDAD = "Capacidad Vehículo (kg)"
 
-    DEMANDAS = "📦 Demanda de Clientes"
+    DEMANDAS = "📦 Demandas"
 
-    DEMANDA_TOTAL = "Demanda Total"
-
-    CAPACIDAD_TOTAL = "Capacidad Total"
-
-    RESULTADOS = "📊 Analítica Operacional"
+    RESULTADOS = "📊 Resultados"
 
     MAPA = "🗺️ Visualización de Rutas"
 
@@ -310,35 +237,27 @@ if idioma == "Español":
 
     ERROR = "No existe solución válida"
 
-    ALERTA = "supera el 95% de capacidad"
-
 else:
 
     TITULO = "🚛 Logistic Intelligence System"
 
     SUBTITULO = "Advanced Transportation & Route Optimization"
 
-    CONFIG = "⚙️ Simulation Configuration"
+    CONFIG = "⚙️ Configuration"
 
     VEHICULOS = "Number of Vehicles"
 
-    CAPACIDAD = "Vehicle Capacity (kg)"
+    CAPACIDAD = "Vehicle Capacity"
 
-    DEMANDAS = "📦 Customer Demand"
+    DEMANDAS = "📦 Demands"
 
-    DEMANDA_TOTAL = "Total Demand"
+    RESULTADOS = "📊 Results"
 
-    CAPACIDAD_TOTAL = "Total Capacity"
-
-    RESULTADOS = "📊 Operational Analytics"
-
-    MAPA = "🗺️ Route Visualization Dashboard"
+    MAPA = "🗺️ Route Visualization"
 
     EXITO = "Optimization completed successfully"
 
-    ERROR = "No feasible solution found"
-
-    ALERTA = "exceeds 95% capacity"
+    ERROR = "No feasible solution"
 
 # ============================================================
 # TÍTULOS
@@ -363,7 +282,7 @@ num_vehiculos = st.sidebar.number_input(
 
 )
 
-capacidad_vehiculo = st.sidebar.number_input(
+capacidad = st.sidebar.number_input(
 
     CAPACIDAD,
     min_value=500,
@@ -371,10 +290,6 @@ capacidad_vehiculo = st.sidebar.number_input(
     value=4000
 
 )
-
-# ============================================================
-# DEMANDAS
-# ============================================================
 
 st.sidebar.subheader(DEMANDAS)
 
@@ -414,6 +329,43 @@ demanda_laureles = st.sidebar.number_input(
 )
 
 # ============================================================
+# DATOS
+# ============================================================
+
+coordenadas = [
+
+    [6.151, -75.615],
+    [6.210, -75.571],
+    [6.173, -75.583],
+    [6.172, -75.609],
+    [6.333, -75.558],
+    [6.243, -75.594]
+
+]
+
+nombres = [
+
+    "CEDI Sabaneta",
+    "El Poblado",
+    "Envigado",
+    "Itagüí",
+    "Bello",
+    "Laureles"
+
+]
+
+demandas = [
+
+    0,
+    demanda_poblado,
+    demanda_envigado,
+    demanda_itagui,
+    demanda_bello,
+    demanda_laureles
+
+]
+
+# ============================================================
 # DISTANCIA
 # ============================================================
 
@@ -423,185 +375,177 @@ def calcular_distancia(coord1, coord2):
 
     lat2, lon2 = coord2
 
-    delta_lat = lat2 - lat1
+    return int(
 
-    delta_lon = lon2 - lon1
+        math.sqrt(
 
-    distancia = math.sqrt(
+            (lat2 - lat1)**2 +
+            (lon2 - lon1)**2
 
-        delta_lat**2 + delta_lon**2
+        ) * 111000
 
     )
 
-    return int(distancia * 111000)
-
 # ============================================================
-# CREAR DATOS
+# MATRIZ
 # ============================================================
 
-def crear_datos():
+matriz = []
 
-    datos = {}
+for i in range(len(coordenadas)):
 
-    datos['coordenadas'] = [
+    fila = []
 
-        [6.151, -75.615],
-        [6.210, -75.571],
-        [6.173, -75.583],
-        [6.172, -75.609],
-        [6.333, -75.558],
-        [6.243, -75.594]
+    for j in range(len(coordenadas)):
 
-    ]
+        fila.append(
 
-    datos['nombres'] = [
+            calcular_distancia(
 
-        "CEDI Sabaneta",
-        "El Poblado",
-        "Envigado",
-        "Itagüí",
-        "Bello",
-        "Laureles"
-
-    ]
-
-    datos['demandas'] = [
-
-        0,
-        demanda_poblado,
-        demanda_envigado,
-        demanda_itagui,
-        demanda_bello,
-        demanda_laureles
-
-    ]
-
-    datos['num_vehiculos'] = num_vehiculos
-
-    datos['capacidades'] = [
-
-        capacidad_vehiculo
-
-    ] * num_vehiculos
-
-    datos['deposito'] = 0
-
-    matriz = []
-
-    for i in range(len(datos['coordenadas'])):
-
-        fila = []
-
-        for j in range(len(datos['coordenadas'])):
-
-            distancia = calcular_distancia(
-
-                datos['coordenadas'][i],
-                datos['coordenadas'][j]
+                coordenadas[i],
+                coordenadas[j]
 
             )
 
-            fila.append(distancia)
+        )
 
-        matriz.append(fila)
-
-    datos['matriz'] = matriz
-
-    return datos
+    matriz.append(fila)
 
 # ============================================================
-# RESOLVER MODELO
+# MODELO
 # ============================================================
 
-def resolver():
+manager = pywrapcp.RoutingIndexManager(
 
-    datos = crear_datos()
+    len(matriz),
+    num_vehiculos,
+    0
 
-    manager = pywrapcp.RoutingIndexManager(
+)
 
-        len(datos['matriz']),
-        datos['num_vehiculos'],
-        datos['deposito']
+routing = pywrapcp.RoutingModel(manager)
 
-    )
+def callback_distancia(desde, hacia):
 
-    routing = pywrapcp.RoutingModel(manager)
+    return matriz[
+        manager.IndexToNode(desde)
+    ][
+        manager.IndexToNode(hacia)
+    ]
 
-    def distancia_callback(desde, hacia):
+transit_callback = routing.RegisterTransitCallback(
 
-        desde_nodo = manager.IndexToNode(desde)
+    callback_distancia
 
-        hacia_nodo = manager.IndexToNode(hacia)
+)
 
-        return datos['matriz'][desde_nodo][hacia_nodo]
+routing.SetArcCostEvaluatorOfAllVehicles(
 
-    transit_callback = routing.RegisterTransitCallback(
+    transit_callback
 
-        distancia_callback
+)
 
-    )
+def callback_demanda(desde):
 
-    routing.SetArcCostEvaluatorOfAllVehicles(
+    return demandas[
+        manager.IndexToNode(desde)
+    ]
 
-        transit_callback
+demand_callback = routing.RegisterUnaryTransitCallback(
 
-    )
+    callback_demanda
 
-    def demanda_callback(desde):
+)
 
-        desde_nodo = manager.IndexToNode(desde)
+routing.AddDimensionWithVehicleCapacity(
 
-        return datos['demandas'][desde_nodo]
+    demand_callback,
+    0,
+    [capacidad] * num_vehiculos,
+    True,
+    'Capacity'
 
-    demand_callback = routing.RegisterUnaryTransitCallback(
+)
 
-        demanda_callback
+parametros = pywrapcp.DefaultRoutingSearchParameters()
 
-    )
+parametros.first_solution_strategy = (
 
-    routing.AddDimensionWithVehicleCapacity(
+    routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
 
-        demand_callback,
-        0,
-        datos['capacidades'],
-        True,
-        'Capacidad'
+)
 
-    )
-
-    parametros = pywrapcp.DefaultRoutingSearchParameters()
-
-    parametros.first_solution_strategy = (
-
-        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
-
-    )
-
-    parametros.local_search_metaheuristic = (
-
-        routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-
-    )
-
-    parametros.time_limit.seconds = 10
-
-    solucion = routing.SolveWithParameters(parametros)
-
-    return datos, solucion, manager, routing
+solucion = routing.SolveWithParameters(parametros)
 
 # ============================================================
-# EXTRAER RUTAS
+# RESULTADOS
 # ============================================================
 
-def obtener_rutas(datos, manager, routing, solucion):
+if solucion:
 
-    rutas = []
+    st.success(EXITO)
 
-    for vehiculo in range(datos['num_vehiculos']):
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.metric(
+
+            "Total Demand",
+            f"{sum(demandas)} kg"
+
+        )
+
+    with col2:
+
+        st.metric(
+
+            "Total Capacity",
+            f"{capacidad * num_vehiculos} kg"
+
+        )
+
+    resultados = []
+
+    fig, ax = plt.subplots(figsize=(10,8))
+
+    colores = [
+
+        'cyan',
+        'lime',
+        'orange',
+        'magenta',
+        'yellow'
+
+    ]
+
+    for i, coord in enumerate(coordenadas):
+
+        ax.scatter(
+
+            coord[1],
+            coord[0],
+            s=250,
+            color='white'
+
+        )
+
+        ax.text(
+
+            coord[1],
+            coord[0],
+            nombres[i],
+            color='white'
+
+        )
+
+    for vehiculo in range(num_vehiculos):
 
         index = routing.Start(vehiculo)
 
         ruta = []
+
+        carga = 0
 
         distancia_total = 0
 
@@ -609,7 +553,9 @@ def obtener_rutas(datos, manager, routing, solucion):
 
             nodo = manager.IndexToNode(index)
 
-            ruta.append(nodo)
+            ruta.append(nombres[nodo])
+
+            carga += demandas[nodo]
 
             previo = index
 
@@ -627,99 +573,47 @@ def obtener_rutas(datos, manager, routing, solucion):
 
             )
 
-        ruta.append(manager.IndexToNode(index))
-
-        rutas.append({
-
-            "vehiculo": vehiculo + 1,
-            "ruta": ruta,
-            "distancia": distancia_total
-
-        })
-
-    return rutas
-
-# ============================================================
-# EJECUTAR
-# ============================================================
-
-datos, solucion, manager, routing = resolver()
-
-if solucion:
-
-    rutas = obtener_rutas(
-
-        datos,
-        manager,
-        routing,
-        solucion
-
-    )
-
-    demanda_total = sum(datos['demandas'])
-
-    capacidad_total = sum(datos['capacidades'])
-
-    st.success(EXITO)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-
-        st.metric(
-
-            DEMANDA_TOTAL,
-            f"{demanda_total} kg"
-
-        )
-
-    with col2:
-
-        st.metric(
-
-            CAPACIDAD_TOTAL,
-            f"{capacidad_total} kg"
-
-        )
-
-    resultados = []
-
-    for r in rutas:
-
-        carga = 0
-
-        nombres = []
-
-        for nodo in r['ruta']:
-
-            nombres.append(
-
-                datos['nombres'][nodo]
-
-            )
-
-            carga += datos['demandas'][nodo]
+        ruta.append("CEDI Sabaneta")
 
         utilizacion = (
 
-            carga / capacidad_vehiculo
+            carga / capacidad
 
         ) * 100
 
         resultados.append({
 
-            "Vehículo": r['vehiculo'],
-            "Ruta": " → ".join(nombres),
+            "Vehículo": vehiculo + 1,
+            "Ruta": " → ".join(ruta),
             "Carga (kg)": carga,
-            "Utilización %": round(utilizacion, 2),
-            "Distancia (km)": round(
-
-                r['distancia'] / 1000,
-                2
-
-            )
+            "Utilización %": round(utilizacion,2),
+            "Distancia (km)": round(distancia_total / 1000,2)
 
         })
+
+        x = []
+        y = []
+
+        for punto in ruta[:-1]:
+
+            idx = nombres.index(punto)
+
+            y.append(coordenadas[idx][0])
+
+            x.append(coordenadas[idx][1])
+
+        x.append(coordenadas[0][1])
+        y.append(coordenadas[0][0])
+
+        ax.plot(
+
+            x,
+            y,
+            linewidth=3,
+            color=colores[vehiculo % len(colores)],
+            label=f'Vehículo {vehiculo+1}'
+
+        )
 
     df = pd.DataFrame(resultados)
 
@@ -732,86 +626,7 @@ if solucion:
 
     )
 
-    for r in resultados:
-
-        if r["Utilización %"] >= 95:
-
-            st.warning(
-
-                f"Vehículo {r['Vehículo']} {ALERTA}"
-
-            )
-
     st.subheader(MAPA)
-
-    fig, ax = plt.subplots(figsize=(10,8))
-
-    colores = [
-
-        'cyan',
-        'lime',
-        'orange',
-        'magenta',
-        'yellow'
-
-    ]
-
-    for i, coord in enumerate(datos['coordenadas']):
-
-        ax.scatter(
-
-            coord[1],
-            coord[0],
-            s=250,
-            color='white'
-
-        )
-
-        ax.text(
-
-            coord[1],
-            coord[0],
-            datos['nombres'][i],
-            color='white'
-
-        )
-
-    for idx, ruta in enumerate(rutas):
-
-        x = []
-
-        y = []
-
-        for nodo in ruta['ruta']:
-
-            y.append(
-
-                datos['coordenadas'][nodo][0]
-
-            )
-
-            x.append(
-
-                datos['coordenadas'][nodo][1]
-
-            )
-
-        ax.plot(
-
-            x,
-            y,
-            linewidth=3,
-            color=colores[idx % len(colores)],
-            label=f'Vehículo {ruta["vehiculo"]}'
-
-        )
-
-    ax.set_title(
-
-        "Optimized Transportation Routes",
-        color='white'
-
-    )
 
     ax.set_facecolor('#0B1120')
 
@@ -824,128 +639,107 @@ if solucion:
     ax.grid(True)
 
     st.pyplot(fig)
-    
-    id="z6w9oc"
-# ============================================================
-# FOOTER / CRÉDITOS PROFESIONALES
-# ============================================================
 
-st.markdown("<br><br>", unsafe_allow_html=True)
+    # ============================================================
+    # FOOTER
+    # ============================================================
 
-st.markdown("""
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
-<hr style="
-    border:1px solid #334155;
-    margin-top:40px;
-    margin-bottom:30px;
-">
+    st.markdown("""
 
-<div style="
+    <hr style="
+        border:1px solid #334155;
+        margin-top:40px;
+        margin-bottom:30px;
+    ">
 
-    text-align:center;
+    <div style="
 
-    padding:30px;
+        text-align:center;
 
-    border-radius:20px;
+        padding:30px;
 
-    background: linear-gradient(
-        135deg,
-        #111827,
-        #0F172A
-    );
+        border-radius:20px;
 
-    border:1px solid #334155;
+        background: linear-gradient(
+            135deg,
+            #111827,
+            #0F172A
+        );
 
-    box-shadow:
-        0px 4px 15px rgba(0,0,0,0.35),
-        0px 0px 12px rgba(96,165,250,0.10);
+        border:1px solid #334155;
 
-">
+    ">
 
-<h2 style="
-    color:#60A5FA;
-    margin-bottom:25px;
-    font-size:30px;
-">
+    <h2 style="
+        color:#60A5FA;
+        margin-bottom:25px;
+        font-size:30px;
+    ">
 
-👨‍💻 Autores del Proyecto
+    👨‍💻 Autores del Proyecto
 
-</h2>
+    </h2>
 
-<!-- AUTOR 1 -->
+    <p style="
+        color:white;
+        font-size:22px;
+        font-weight:bold;
+    ">
 
-<div style="
-    margin-bottom:25px;
-">
+    Miguel Ángel Monedero Aguado
 
-<p style="
-    color:white;
-    font-size:22px;
-    font-weight:bold;
-    margin-bottom:8px;
-">
+    </p>
 
-Miguel Ángel Monedero Aguado
+    <p style="
+        color:#CBD5E1;
+        font-size:18px;
+    ">
 
-</p>
+    📞 31843741842
 
-<p style="
-    color:#CBD5E1;
-    font-size:18px;
-">
+    </p>
 
-📞 31843741842
+    <br>
 
-</p>
+    <p style="
+        color:white;
+        font-size:22px;
+        font-weight:bold;
+    ">
 
-</div>
+    Cristhyan Felipe Uran España
 
-<!-- AUTOR 2 -->
+    </p>
 
-<div style="
-    margin-bottom:25px;
-">
+    <p style="
+        color:#CBD5E1;
+        font-size:18px;
+    ">
 
-<p style="
-    color:white;
-    font-size:22px;
-    font-weight:bold;
-    margin-bottom:8px;
-">
+    📞 3105482523
 
-Cristhyan Felipe Uran España
+    </p>
 
-</p>
+    <br>
 
-<p style="
-    color:#CBD5E1;
-    font-size:18px;
-">
+    <p style="
+        color:#94A3B8;
+        font-size:15px;
+    ">
 
-📞 3105482523
+    Sistema Inteligente de Logística •
+    Optimización de Rutas •
+    Python • Streamlit • OR-Tools
 
-</p>
+    </p>
 
-</div>
+    </div>
 
-<!-- DESCRIPCIÓN -->
-
-<p style="
-    color:#94A3B8;
-    font-size:15px;
-    margin-top:20px;
-">
-
-Sistema Inteligente de Logística •
-Optimización de Rutas •
-Python • Streamlit • OR-Tools
-
-</p>
-
-</div>
-
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 else:
 
     st.error(ERROR)
+```
