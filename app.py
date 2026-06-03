@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # ============================================================
-# CSS PREMIUM (CON CONTRASTE ARREGLADO)
+# CSS PREMIUM
 # ============================================================
 
 st.markdown("""
@@ -27,19 +27,18 @@ st.markdown("""
     color: white;
 }
 
-/* SIDEBAR */
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg,#0F172A,#111827);
     border-right: 2px solid #1E293B;
 }
 
-/* MEJOR CONTRASTE SELECTBOX */
-.stSelectbox label {
-    color: #60A5FA !important;
-    font-weight: 700;
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] div {
+    color: #FFFFFF !important;
 }
 
-/* INPUTS */
 .stNumberInput input {
     background-color: #1E293B !important;
     color: white !important;
@@ -47,7 +46,6 @@ section[data-testid="stSidebar"] {
     border: 1px solid #334155 !important;
 }
 
-/* TÍTULOS */
 h1 {
     color: white !important;
     font-size: 48px !important;
@@ -62,7 +60,7 @@ h2, h3 {
 """, unsafe_allow_html=True)
 
 # ============================================================
-# IDIOMA (ARREGLADO VISUAL)
+# IDIOMA
 # ============================================================
 
 idioma = st.sidebar.selectbox(
@@ -123,7 +121,48 @@ demanda_bello = st.sidebar.number_input("Bello", value=2200)
 demanda_laureles = st.sidebar.number_input("Laureles", value=900)
 
 # ============================================================
-# DATOS FIJOS
+# 🚀 CLIENTES DINÁMICOS (AGREGAR / ELIMINAR) - NUEVO
+# ============================================================
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("📦 Gestión de Clientes")
+
+if "clientes" not in st.session_state:
+    st.session_state.clientes = []
+
+cli_nombre = st.sidebar.text_input("Nombre Cliente")
+cli_demanda = st.sidebar.number_input("Demanda Cliente", value=100)
+
+cli_lat = st.sidebar.number_input("Lat Cliente", value=6.200, format="%.3f", step=0.001)
+cli_lon = st.sidebar.number_input("Lon Cliente", value=-75.600, format="%.3f", step=0.001)
+
+if st.sidebar.button("➕ Agregar Cliente"):
+    if cli_nombre != "":
+        st.session_state.clientes.append({
+            "nombre": cli_nombre,
+            "demanda": cli_demanda,
+            "coord": [cli_lat, cli_lon]
+        })
+
+if len(st.session_state.clientes) > 0:
+
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("🗑️ Eliminar Cliente")
+
+    cliente_borrar = st.sidebar.selectbox(
+        "Selecciona cliente",
+        [c["nombre"] for c in st.session_state.clientes]
+    )
+
+    if st.sidebar.button("❌ Eliminar Cliente"):
+        st.session_state.clientes = [
+            c for c in st.session_state.clientes
+            if c["nombre"] != cliente_borrar
+        ]
+        st.rerun()
+
+# ============================================================
+# DATOS (CEDI FIJO + CLIENTES DINÁMICOS)
 # ============================================================
 
 coordenadas = [
@@ -153,12 +192,11 @@ demandas = [
     demanda_laureles
 ]
 
-# ============================================================
-# ELIMINAR CLIENTE (ARREGLADO Y FUNCIONAL)
-# ============================================================
-
-# Nota: aquí no hay clientes dinámicos en este modelo
-# pero se deja estructura limpia si luego quieres extenderlo
+# ➕ CLIENTES DINÁMICOS SE AGREGAN AL MODELO SIN TOCAR TU BASE
+for c in st.session_state.clientes:
+    coordenadas.append(c["coord"])
+    nombres.append(c["nombre"])
+    demandas.append(c["demanda"])
 
 # ============================================================
 # DISTANCIA
@@ -232,12 +270,10 @@ if solucion:
 
     colores = ['cyan', 'lime', 'orange', 'magenta', 'yellow']
 
-    # NODOS CON NOMBRES VISIBLES
     for i, coord in enumerate(coordenadas):
         ax.scatter(coord[1], coord[0], s=250, color='white')
         ax.text(coord[1], coord[0], nombres[i], color='white')
 
-    # RUTAS
     for vehiculo in range(num_vehiculos):
 
         index = routing.Start(vehiculo)
@@ -255,9 +291,7 @@ if solucion:
             index = solucion.Value(routing.NextVar(index))
 
             distancia_total += routing.GetArcCostForVehicle(
-                prev,
-                index,
-                vehiculo
+                prev, index, vehiculo
             )
 
         ruta.append("CEDI Sabaneta")
@@ -302,41 +336,3 @@ if solucion:
 
 else:
     st.error(ERROR)
-
-# ============================================================
-# FOOTER AUTORES (ARREGLADO Y FINAL)
-# ============================================================
-
-st.markdown("""
-<hr style="border:1px solid #334155; margin-top:40px;">
-
-<div style='text-align:center; padding:25px;'>
-
-<h2 style="color:#60A5FA;">👨‍💻 Autores del Proyecto</h2>
-
-<p style="color:white; font-size:20px;">
-Miguel Ángel Monedero Aguado
-</p>
-
-<p style="color:#CBD5E1;">
-📞 31843741842
-</p>
-
-<br>
-
-<p style="color:white; font-size:20px;">
-Cristhyan Felipe Uran España
-</p>
-
-<p style="color:#CBD5E1;">
-📞 3105482523
-</p>
-
-<br>
-
-<p style="color:#94A3B8; font-size:14px;">
-Sistema Inteligente de Logística • Streamlit • OR-Tools
-</p>
-
-</div>
-""", unsafe_allow_html=True)
