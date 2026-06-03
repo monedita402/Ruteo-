@@ -27,14 +27,14 @@ cedi = {
 }
 
 # ============================================================
-# SESSION STATE (SOLO CLIENTES)
+# SESSION STATE
 # ============================================================
 
 if "clientes" not in st.session_state:
     st.session_state.clientes = []
 
 # ============================================================
-# CONFIGURACIÓN
+# SIDEBAR CONFIG
 # ============================================================
 
 st.sidebar.header("⚙️ Configuración")
@@ -54,11 +54,32 @@ cli_lat = st.sidebar.number_input("Lat Cliente", value=6.20)
 cli_lon = st.sidebar.number_input("Lon Cliente", value=-75.60)
 
 if st.sidebar.button("➕ Agregar Cliente"):
-    st.session_state.clientes.append({
-        "nombre": cli_nombre,
-        "demanda": cli_demanda,
-        "coord": [cli_lat, cli_lon]
-    })
+    if cli_nombre != "":
+        st.session_state.clientes.append({
+            "nombre": cli_nombre,
+            "demanda": cli_demanda,
+            "coord": [cli_lat, cli_lon]
+        })
+
+# ============================================================
+# ELIMINAR CLIENTE
+# ============================================================
+
+st.sidebar.subheader("🗑️ Eliminar Cliente")
+
+if len(st.session_state.clientes) > 0:
+
+    cliente_a_borrar = st.sidebar.selectbox(
+        "Selecciona cliente",
+        [c["nombre"] for c in st.session_state.clientes]
+    )
+
+    if st.sidebar.button("❌ Eliminar cliente"):
+        st.session_state.clientes = [
+            c for c in st.session_state.clientes
+            if c["nombre"] != cliente_a_borrar
+        ]
+        st.rerun()
 
 # ============================================================
 # TABLA CLIENTES
@@ -67,10 +88,12 @@ if st.sidebar.button("➕ Agregar Cliente"):
 st.subheader("📦 Clientes")
 
 if len(st.session_state.clientes) > 0:
+
     clientes_df = pd.DataFrame(st.session_state.clientes)
     clientes_df["Lat"] = clientes_df["coord"].apply(lambda x: x[0])
     clientes_df["Lon"] = clientes_df["coord"].apply(lambda x: x[1])
     clientes_df = clientes_df.drop(columns=["coord"])
+
     st.dataframe(clientes_df, use_container_width=True)
 
 # ============================================================
@@ -94,7 +117,7 @@ for c in st.session_state.clientes:
     nombres.append(c["nombre"])
     demandas.append(c["demanda"])
 
-depot_index = 0  # CEDI fijo
+depot_index = 0
 
 # ============================================================
 # DISTANCIA
@@ -150,7 +173,7 @@ params.first_solution_strategy = (
 solution = routing.SolveWithParameters(params)
 
 # ============================================================
-# RESULTADOS + MAPA
+# RESULTADOS + PLANO CARTESIANO
 # ============================================================
 
 if solution:
@@ -182,9 +205,9 @@ if solution:
     )
 
     # CLIENTES
-    for i, c in enumerate(st.session_state.clientes, start=1):
-        ax.scatter(c["coord"][1], c["coord"][0], s=150)
-        ax.text(c["coord"][1], c["coord"][0], c["nombre"])
+    for c in st.session_state.clientes:
+        ax.scatter(c["coord"][1], c["coord"][0], s=150, color="white")
+        ax.text(c["coord"][1], c["coord"][0], c["nombre"], color="white")
 
     for v in range(num_vehiculos):
 
@@ -211,7 +234,7 @@ if solution:
         resultados.append({
             "Vehículo": v + 1,
             "Ruta": " → ".join(ruta),
-            "Carga": carga,
+            "Carga (kg)": carga,
             "Utilización %": round((carga / capacidad) * 100, 2),
             "Distancia km": round(distancia_total / 1000, 2)
         })
