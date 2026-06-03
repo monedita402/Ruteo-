@@ -26,7 +26,9 @@ st.markdown("""
 
 <style>
 
-/* Fondo principal */
+/* =========================================================
+FONDO PRINCIPAL
+========================================================= */
 
 .stApp {
 
@@ -35,29 +37,114 @@ st.markdown("""
 
 }
 
-/* Sidebar */
+/* =========================================================
+SIDEBAR
+========================================================= */
 
 section[data-testid="stSidebar"] {
 
-    background-color: #111827;
+    background: linear-gradient(
+        180deg,
+        #0F172A,
+        #111827
+    );
+
     border-right: 2px solid #1E293B;
 
-}
-
-/* Texto sidebar */
-
-section[data-testid="stSidebar"] * {
-
-    color: #F9FAFB !important;
+    padding-top: 20px;
 
 }
 
-/* Títulos */
+/* =========================================================
+TEXTOS SIDEBAR
+========================================================= */
+
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] div {
+
+    color: #F8FAFC !important;
+    font-weight: 500;
+
+}
+
+/* =========================================================
+SELECTBOX
+========================================================= */
+
+.stSelectbox div[data-baseweb="select"] {
+
+    background-color: #1E293B !important;
+
+    border-radius: 12px !important;
+
+    border: 1px solid #334155 !important;
+
+}
+
+/* Texto selectbox */
+
+.stSelectbox div[data-baseweb="select"] span {
+
+    color: white !important;
+
+}
+
+/* Dropdown */
+
+div[role="listbox"] {
+
+    background-color: #1E293B !important;
+
+    color: white !important;
+
+    border-radius: 10px !important;
+
+}
+
+/* Opciones dropdown */
+
+div[role="option"] {
+
+    color: white !important;
+
+}
+
+/* Hover opciones */
+
+div[role="option"]:hover {
+
+    background-color: #2563EB !important;
+
+}
+
+/* =========================================================
+INPUTS NUMBER
+========================================================= */
+
+.stNumberInput input {
+
+    background-color: #1E293B !important;
+
+    color: white !important;
+
+    border-radius: 10px !important;
+
+    border: 1px solid #334155 !important;
+
+}
+
+/* =========================================================
+TÍTULOS
+========================================================= */
 
 h1 {
 
     color: white !important;
+
     font-size: 48px !important;
+
     font-weight: 800 !important;
 
 }
@@ -65,19 +152,14 @@ h1 {
 h2, h3 {
 
     color: #60A5FA !important;
+
     font-weight: 700 !important;
 
 }
 
-/* Texto general */
-
-p, label, div {
-
-    color: #E5E7EB;
-
-}
-
-/* KPIs */
+/* =========================================================
+KPIs
+========================================================= */
 
 div[data-testid="metric-container"] {
 
@@ -97,34 +179,43 @@ div[data-testid="metric-container"] {
 
 }
 
-/* Texto KPIs */
+/* KPI LABEL */
 
 div[data-testid="metric-container"] label {
 
-    color: #94A3B8 !important;
-    font-size: 15px !important;
+    color: #CBD5E1 !important;
 
 }
+
+/* KPI VALUE */
 
 div[data-testid="metric-container"] div {
 
     color: white !important;
+
     font-size: 30px !important;
+
     font-weight: bold !important;
 
 }
 
-/* Tabla */
+/* =========================================================
+TABLAS
+========================================================= */
 
 [data-testid="stDataFrame"] {
 
     border-radius: 14px;
+
     overflow: hidden;
+
     border: 1px solid #334155;
 
 }
 
-/* Botones */
+/* =========================================================
+BOTONES
+========================================================= */
 
 .stButton>button {
 
@@ -146,17 +237,21 @@ div[data-testid="metric-container"] div {
 
 }
 
-/* Inputs */
+/* Hover botón */
 
-.stNumberInput input {
+.stButton>button:hover {
 
-    background-color: #1E293B !important;
-    color: white !important;
-    border-radius: 10px !important;
+    background: linear-gradient(
+        135deg,
+        #1D4ED8,
+        #1E40AF
+    );
 
 }
 
-/* Alertas */
+/* =========================================================
+ALERTAS
+========================================================= */
 
 .stAlert {
 
@@ -319,7 +414,7 @@ demanda_laureles = st.sidebar.number_input(
 )
 
 # ============================================================
-# FUNCIÓN DISTANCIA
+# DISTANCIA
 # ============================================================
 
 def calcular_distancia(coord1, coord2):
@@ -341,7 +436,7 @@ def calcular_distancia(coord1, coord2):
     return int(distancia * 111000)
 
 # ============================================================
-# CREACIÓN DE DATOS
+# CREAR DATOS
 # ============================================================
 
 def crear_datos():
@@ -545,7 +640,7 @@ def obtener_rutas(datos, manager, routing, solucion):
     return rutas
 
 # ============================================================
-# EJECUCIÓN
+# EJECUTAR
 # ============================================================
 
 datos, solucion, manager, routing = resolver()
@@ -646,10 +741,6 @@ if solucion:
                 f"Vehículo {r['Vehículo']} {ALERTA}"
 
             )
-
-    # ========================================================
-    # GRÁFICA
-    # ========================================================
 
     st.subheader(MAPA)
 
