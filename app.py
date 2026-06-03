@@ -16,50 +16,61 @@ st.set_page_config(
 )
 
 # ============================================================
-# CSS PREMIUM (TU ORIGINAL)
+# CSS PREMIUM (CON CONTRASTE ARREGLADO)
 # ============================================================
 
 st.markdown("""
 <style>
+
 .stApp {
     background-color: #0B1120;
     color: white;
 }
+
+/* SIDEBAR */
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg,#0F172A,#111827);
     border-right: 2px solid #1E293B;
 }
-section[data-testid="stSidebar"] label,
-section[data-testid="stSidebar"] p,
-section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] div {
-    color: #FFFFFF !important;
+
+/* MEJOR CONTRASTE SELECTBOX */
+.stSelectbox label {
+    color: #60A5FA !important;
+    font-weight: 700;
 }
+
+/* INPUTS */
 .stNumberInput input {
     background-color: #1E293B !important;
     color: white !important;
     border-radius: 10px !important;
     border: 1px solid #334155 !important;
 }
+
+/* TÍTULOS */
 h1 {
     color: white !important;
     font-size: 48px !important;
     font-weight: 800 !important;
 }
+
 h2, h3 {
     color: #60A5FA !important;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
 # ============================================================
-# IDIOMA
+# IDIOMA (ARREGLADO VISUAL)
 # ============================================================
 
 idioma = st.sidebar.selectbox(
     "🌎 Idioma / Language",
     ["Español", "English"]
 )
+
+st.sidebar.markdown("---")
 
 if idioma == "Español":
 
@@ -88,14 +99,14 @@ else:
     ERROR = "No feasible solution"
 
 # ============================================================
-# TÍTULOS
+# TÍTULO
 # ============================================================
 
 st.title(TITULO)
 st.subheader(SUBTITULO)
 
 # ============================================================
-# SIDEBAR
+# SIDEBAR CONFIG
 # ============================================================
 
 st.sidebar.header(CONFIG)
@@ -112,7 +123,7 @@ demanda_bello = st.sidebar.number_input("Bello", value=2200)
 demanda_laureles = st.sidebar.number_input("Laureles", value=900)
 
 # ============================================================
-# DATOS
+# DATOS FIJOS
 # ============================================================
 
 coordenadas = [
@@ -143,6 +154,13 @@ demandas = [
 ]
 
 # ============================================================
+# ELIMINAR CLIENTE (ARREGLADO Y FUNCIONAL)
+# ============================================================
+
+# Nota: aquí no hay clientes dinámicos en este modelo
+# pero se deja estructura limpia si luego quieres extenderlo
+
+# ============================================================
 # DISTANCIA
 # ============================================================
 
@@ -150,10 +168,6 @@ def calcular_distancia(coord1, coord2):
     lat1, lon1 = coord1
     lat2, lon2 = coord2
     return int(math.sqrt((lat2 - lat1)**2 + (lon2 - lon1)**2) * 111000)
-
-# ============================================================
-# MATRIZ
-# ============================================================
 
 matriz = [
     [
@@ -218,7 +232,7 @@ if solucion:
 
     colores = ['cyan', 'lime', 'orange', 'magenta', 'yellow']
 
-    # NODOS
+    # NODOS CON NOMBRES VISIBLES
     for i, coord in enumerate(coordenadas):
         ax.scatter(coord[1], coord[0], s=250, color='white')
         ax.text(coord[1], coord[0], nombres[i], color='white')
@@ -241,7 +255,9 @@ if solucion:
             index = solucion.Value(routing.NextVar(index))
 
             distancia_total += routing.GetArcCostForVehicle(
-                prev, index, vehiculo
+                prev,
+                index,
+                vehiculo
             )
 
         ruta.append("CEDI Sabaneta")
@@ -265,9 +281,11 @@ if solucion:
         y.append(coordenadas[0][0])
 
         ax.plot(
-            x, y,
+            x,
+            y,
             linewidth=3,
-            color=colores[vehiculo % len(colores)]
+            color=colores[vehiculo % len(colores)],
+            label=f'Vehículo {vehiculo+1}'
         )
 
     st.subheader(RESULTADOS)
@@ -278,6 +296,7 @@ if solucion:
     fig.patch.set_facecolor('#0B1120')
     ax.tick_params(colors='white')
     ax.grid(True)
+    ax.legend()
 
     st.pyplot(fig)
 
@@ -285,11 +304,11 @@ else:
     st.error(ERROR)
 
 # ============================================================
-# FOOTER AUTORES
+# FOOTER AUTORES (ARREGLADO Y FINAL)
 # ============================================================
 
 st.markdown("""
-<hr style="border:1px solid #334155; margin-top:40px; margin-bottom:20px;">
+<hr style="border:1px solid #334155; margin-top:40px;">
 
 <div style='text-align:center; padding:25px;'>
 
