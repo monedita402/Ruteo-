@@ -25,7 +25,9 @@ st.markdown("""
 
 <style>
 
-/* Fondo */
+/* =========================================================
+FONDO PRINCIPAL
+========================================================= */
 
 .stApp {
 
@@ -34,7 +36,9 @@ st.markdown("""
 
 }
 
-/* Sidebar */
+/* =========================================================
+SIDEBAR
+========================================================= */
 
 section[data-testid="stSidebar"] {
 
@@ -48,18 +52,22 @@ section[data-testid="stSidebar"] {
 
 }
 
-/* Textos sidebar */
+/* =========================================================
+TEXTOS SIDEBAR
+========================================================= */
 
 section[data-testid="stSidebar"] label,
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] span,
 section[data-testid="stSidebar"] div {
 
-    color: white !important;
+    color: #FFFFFF !important;
 
 }
 
-/* Selectbox */
+/* =========================================================
+SELECTBOX
+========================================================= */
 
 .stSelectbox div[data-baseweb="select"] {
 
@@ -95,7 +103,9 @@ div[role="option"]:hover {
 
 }
 
-/* Inputs */
+/* =========================================================
+INPUTS
+========================================================= */
 
 .stNumberInput input {
 
@@ -105,9 +115,13 @@ div[role="option"]:hover {
 
     border-radius: 10px !important;
 
+    border: 1px solid #334155 !important;
+
 }
 
-/* Títulos */
+/* =========================================================
+TÍTULOS
+========================================================= */
 
 h1 {
 
@@ -125,7 +139,9 @@ h2, h3 {
 
 }
 
-/* KPIs */
+/* =========================================================
+KPIs
+========================================================= */
 
 div[data-testid="metric-container"] {
 
@@ -147,31 +163,37 @@ div[data-testid="metric-container"] {
 
 }
 
-/* KPI Texto */
+/* TÍTULO KPI */
 
 div[data-testid="metric-container"] label {
 
-    color: white !important;
+    color: #FFFFFF !important;
 
     font-size: 20px !important;
 
     font-weight: 800 !important;
 
+    opacity: 1 !important;
+
 }
 
-/* KPI Valor */
+/* VALOR KPI */
 
-div[data-testid="metric-container"] div {
+div[data-testid="metric-container"] [data-testid="stMetricValue"] {
 
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 
     font-size: 42px !important;
 
     font-weight: 900 !important;
 
+    opacity: 1 !important;
+
 }
 
-/* Tabla */
+/* =========================================================
+TABLAS
+========================================================= */
 
 [data-testid="stDataFrame"] {
 
@@ -181,7 +203,9 @@ div[data-testid="metric-container"] div {
 
 }
 
-/* Alertas */
+/* =========================================================
+ALERTAS
+========================================================= */
 
 .stAlert {
 
@@ -653,23 +677,17 @@ if solucion:
         margin-bottom:30px;
     ">
 
-    <div style="
-
+    <div style='
         text-align:center;
-
         padding:30px;
-
         border-radius:20px;
-
         background: linear-gradient(
             135deg,
             #111827,
             #0F172A
         );
-
         border:1px solid #334155;
-
-    ">
+    '>
 
     <h2 style="
         color:#60A5FA;
@@ -741,3 +759,4 @@ if solucion:
 else:
 
     st.error(ERROR)
+
