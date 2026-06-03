@@ -43,15 +43,28 @@ num_vehiculos = st.sidebar.number_input("Vehículos", 1, 10, 2)
 capacidad = st.sidebar.number_input("Capacidad vehículo", 500, 10000, 4000)
 
 # ============================================================
-# AGREGAR CLIENTES
+# AGREGAR CLIENTES (3 DECIMALES)
 # ============================================================
 
 st.sidebar.subheader("📦 Agregar Cliente")
 
 cli_nombre = st.sidebar.text_input("Nombre Cliente")
+
 cli_demanda = st.sidebar.number_input("Demanda", value=100)
-cli_lat = st.sidebar.number_input("Lat Cliente", value=6.20)
-cli_lon = st.sidebar.number_input("Lon Cliente", value=-75.60)
+
+cli_lat = st.sidebar.number_input(
+    "Lat Cliente",
+    value=6.200,
+    format="%.3f",
+    step=0.001
+)
+
+cli_lon = st.sidebar.number_input(
+    "Lon Cliente",
+    value=-75.600,
+    format="%.3f",
+    step=0.001
+)
 
 if st.sidebar.button("➕ Agregar Cliente"):
     if cli_nombre != "":
@@ -184,30 +197,57 @@ if solution:
 
     fig, ax = plt.subplots(figsize=(10, 7))
 
-    ax.set_title("Plano Logístico - CEDI Sabaneta")
+    ax.set_title("Plano Cartesiano Logístico")
     ax.set_xlabel("Longitud (Lon)")
     ax.set_ylabel("Latitud (Lat)")
 
-    colors = ["cyan", "lime", "orange", "magenta", "yellow"]
+    # ========================================================
+    # CEDI (NODO PRINCIPAL)
+    # ========================================================
 
-    # CEDI
     ax.scatter(
         cedi["coord"][1],
         cedi["coord"][0],
-        s=300,
-        color="red"
-    )
-    ax.text(
-        cedi["coord"][1],
-        cedi["coord"][0],
-        cedi["nombre"],
+        s=350,
         color="red"
     )
 
-    # CLIENTES
+    ax.text(
+        cedi["coord"][1],
+        cedi["coord"][0],
+        f"🏭 {cedi['nombre']}",
+        fontsize=11,
+        fontweight="bold",
+        color="red"
+    )
+
+    # ========================================================
+    # CLIENTES (CON NOMBRES Y DEMANDA)
+    # ========================================================
+
     for c in st.session_state.clientes:
-        ax.scatter(c["coord"][1], c["coord"][0], s=150, color="white")
-        ax.text(c["coord"][1], c["coord"][0], c["nombre"], color="white")
+
+        ax.scatter(
+            c["coord"][1],
+            c["coord"][0],
+            s=180,
+            color="cyan"
+        )
+
+        ax.text(
+            c["coord"][1],
+            c["coord"][0],
+            f"📦 {c['nombre']}\n({c['demanda']} kg)",
+            fontsize=9,
+            fontweight="bold",
+            color="white"
+        )
+
+    # ========================================================
+    # RUTAS
+    # ========================================================
+
+    colors = ["cyan", "lime", "orange", "magenta", "yellow"]
 
     for v in range(num_vehiculos):
 
@@ -250,11 +290,16 @@ if solution:
         y.append(cedi["coord"][0])
 
         ax.plot(
-            x, y,
+            x,
+            y,
             linewidth=3,
             color=colors[v % len(colors)],
             label=f"Vehículo {v+1}"
         )
+
+    # ========================================================
+    # RESULTADOS
+    # ========================================================
 
     st.subheader("📊 Resultados")
     st.dataframe(pd.DataFrame(resultados), use_container_width=True)
