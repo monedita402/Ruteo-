@@ -1,3 +1,4 @@
+```python
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -26,20 +27,16 @@ st.markdown("""
 
 <style>
 
-/* =========================================================
-FONDO GENERAL
-========================================================= */
+/* Fondo principal */
 
 .stApp {
 
     background-color: #0B1120;
-    color: #FFFFFF;
+    color: white;
 
 }
 
-/* =========================================================
-SIDEBAR
-========================================================= */
+/* Sidebar */
 
 section[data-testid="stSidebar"] {
 
@@ -56,13 +53,11 @@ section[data-testid="stSidebar"] * {
 
 }
 
-/* =========================================================
-TÍTULOS
-========================================================= */
+/* Títulos */
 
 h1 {
 
-    color: #FFFFFF !important;
+    color: white !important;
     font-size: 48px !important;
     font-weight: 800 !important;
 
@@ -75,9 +70,7 @@ h2, h3 {
 
 }
 
-/* =========================================================
-SUBTÍTULOS Y TEXTOS
-========================================================= */
+/* Texto general */
 
 p, label, div {
 
@@ -85,9 +78,7 @@ p, label, div {
 
 }
 
-/* =========================================================
-KPIs / MÉTRICAS
-========================================================= */
+/* KPIs */
 
 div[data-testid="metric-container"] {
 
@@ -107,7 +98,7 @@ div[data-testid="metric-container"] {
 
 }
 
-/* Texto métricas */
+/* Texto KPIs */
 
 div[data-testid="metric-container"] label {
 
@@ -124,9 +115,7 @@ div[data-testid="metric-container"] div {
 
 }
 
-/* =========================================================
-TABLAS
-========================================================= */
+/* Tabla */
 
 [data-testid="stDataFrame"] {
 
@@ -136,9 +125,7 @@ TABLAS
 
 }
 
-/* =========================================================
-BOTONES
-========================================================= */
+/* Botones */
 
 .stButton>button {
 
@@ -160,19 +147,7 @@ BOTONES
 
 }
 
-.stButton>button:hover {
-
-    background: linear-gradient(
-        135deg,
-        #1D4ED8,
-        #1E40AF
-    );
-
-}
-
-/* =========================================================
-INPUTS
-========================================================= */
+/* Inputs */
 
 .stNumberInput input {
 
@@ -182,23 +157,11 @@ INPUTS
 
 }
 
-/* =========================================================
-ALERTAS
-========================================================= */
+/* Alertas */
 
 .stAlert {
 
     border-radius: 14px;
-
-}
-
-/* =========================================================
-GRÁFICAS
-========================================================= */
-
-canvas {
-
-    border-radius: 12px;
 
 }
 
@@ -207,24 +170,99 @@ canvas {
 """, unsafe_allow_html=True)
 
 # ============================================================
+# SELECTOR DE IDIOMA
+# ============================================================
+
+idioma = st.sidebar.selectbox(
+
+    "🌎 Idioma / Language",
+
+    [
+
+        "Español",
+        "English"
+
+    ]
+
+)
+
+# ============================================================
+# TEXTOS DINÁMICOS
+# ============================================================
+
+if idioma == "Español":
+
+    TITULO = "🚛 Sistema Inteligente de Logística"
+
+    SUBTITULO = "Optimización Avanzada de Transporte y Rutas"
+
+    CONFIG = "⚙️ Configuración de Simulación"
+
+    VEHICULOS = "Cantidad de Vehículos"
+
+    CAPACIDAD = "Capacidad del Vehículo (kg)"
+
+    DEMANDAS = "📦 Demanda de Clientes"
+
+    DEMANDA_TOTAL = "Demanda Total"
+
+    CAPACIDAD_TOTAL = "Capacidad Total"
+
+    RESULTADOS = "📊 Analítica Operacional"
+
+    MAPA = "🗺️ Visualización de Rutas"
+
+    EXITO = "Optimización realizada correctamente"
+
+    ERROR = "No existe solución válida"
+
+    ALERTA = "supera el 95% de capacidad"
+
+else:
+
+    TITULO = "🚛 Logistic Intelligence System"
+
+    SUBTITULO = "Advanced Transportation & Route Optimization"
+
+    CONFIG = "⚙️ Simulation Configuration"
+
+    VEHICULOS = "Number of Vehicles"
+
+    CAPACIDAD = "Vehicle Capacity (kg)"
+
+    DEMANDAS = "📦 Customer Demand"
+
+    DEMANDA_TOTAL = "Total Demand"
+
+    CAPACIDAD_TOTAL = "Total Capacity"
+
+    RESULTADOS = "📊 Operational Analytics"
+
+    MAPA = "🗺️ Route Visualization Dashboard"
+
+    EXITO = "Optimization completed successfully"
+
+    ERROR = "No feasible solution found"
+
+    ALERTA = "exceeds 95% capacity"
+
+# ============================================================
 # TÍTULOS
 # ============================================================
 
-st.title("🚛 Logistic Intelligence System")
+st.title(TITULO)
 
-st.subheader(
-    "Advanced Transportation & Route Optimization"
-)
+st.subheader(SUBTITULO)
 
 # ============================================================
 # SIDEBAR
 # ============================================================
 
-st.sidebar.header("⚙️ Simulation Configuration")
+st.sidebar.header(CONFIG)
 
 num_vehiculos = st.sidebar.number_input(
 
-    "Number of Vehicles",
+    VEHICULOS,
     min_value=1,
     max_value=10,
     value=2
@@ -233,7 +271,7 @@ num_vehiculos = st.sidebar.number_input(
 
 capacidad_vehiculo = st.sidebar.number_input(
 
-    "Vehicle Capacity (kg)",
+    CAPACIDAD,
     min_value=500,
     max_value=10000,
     value=4000
@@ -244,7 +282,7 @@ capacidad_vehiculo = st.sidebar.number_input(
 # DEMANDAS
 # ============================================================
 
-st.sidebar.subheader("📦 Customer Demand")
+st.sidebar.subheader(DEMANDAS)
 
 demanda_poblado = st.sidebar.number_input(
 
@@ -282,7 +320,7 @@ demanda_laureles = st.sidebar.number_input(
 )
 
 # ============================================================
-# DISTANCIA
+# FUNCIÓN DISTANCIA
 # ============================================================
 
 def calcular_distancia(coord1, coord2):
@@ -304,7 +342,7 @@ def calcular_distancia(coord1, coord2):
     return int(distancia * 111000)
 
 # ============================================================
-# MODELO DATOS
+# CREACIÓN DE DATOS
 # ============================================================
 
 def crear_datos():
@@ -395,8 +433,6 @@ def resolver():
 
     routing = pywrapcp.RoutingModel(manager)
 
-    # DISTANCIA
-
     def distancia_callback(desde, hacia):
 
         desde_nodo = manager.IndexToNode(desde)
@@ -416,8 +452,6 @@ def resolver():
         transit_callback
 
     )
-
-    # DEMANDA
 
     def demanda_callback(desde):
 
@@ -532,9 +566,7 @@ if solucion:
 
     capacidad_total = sum(datos['capacidades'])
 
-    st.success(
-        "Optimization completed successfully"
-    )
+    st.success(EXITO)
 
     col1, col2 = st.columns(2)
 
@@ -542,7 +574,7 @@ if solucion:
 
         st.metric(
 
-            "Total Demand",
+            DEMANDA_TOTAL,
             f"{demanda_total} kg"
 
         )
@@ -551,7 +583,7 @@ if solucion:
 
         st.metric(
 
-            "Total Capacity",
+            CAPACIDAD_TOTAL,
             f"{capacidad_total} kg"
 
         )
@@ -582,11 +614,11 @@ if solucion:
 
         resultados.append({
 
-            "Vehicle": r['vehiculo'],
-            "Route": " → ".join(nombres),
-            "Load (kg)": carga,
-            "Utilization %": round(utilizacion, 2),
-            "Distance (km)": round(
+            "Vehículo": r['vehiculo'],
+            "Ruta": " → ".join(nombres),
+            "Carga (kg)": carga,
+            "Utilización %": round(utilizacion, 2),
+            "Distancia (km)": round(
 
                 r['distancia'] / 1000,
                 2
@@ -597,7 +629,7 @@ if solucion:
 
     df = pd.DataFrame(resultados)
 
-    st.subheader("📊 Operational Analytics")
+    st.subheader(RESULTADOS)
 
     st.dataframe(
 
@@ -608,11 +640,11 @@ if solucion:
 
     for r in resultados:
 
-        if r["Utilization %"] >= 95:
+        if r["Utilización %"] >= 95:
 
             st.warning(
 
-                f"Vehicle {r['Vehicle']} exceeds 95% capacity"
+                f"Vehículo {r['Vehículo']} {ALERTA}"
 
             )
 
@@ -620,7 +652,7 @@ if solucion:
     # GRÁFICA
     # ========================================================
 
-    st.subheader("🗺️ Route Visualization Dashboard")
+    st.subheader(MAPA)
 
     fig, ax = plt.subplots(figsize=(10,8))
 
@@ -680,7 +712,7 @@ if solucion:
             y,
             linewidth=3,
             color=colores[idx % len(colores)],
-            label=f'Vehicle {ruta["vehiculo"]}'
+            label=f'Vehículo {ruta["vehiculo"]}'
 
         )
 
@@ -705,8 +737,5 @@ if solucion:
 
 else:
 
-    st.error(
-
-        "No feasible solution found"
-
-    )
+    st.error(ERROR)
+```
