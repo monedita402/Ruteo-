@@ -1,8 +1,19 @@
-# CVRP Expreso de la Montaña
+````md
+# Sistema de Optimización Logística
 
-Aplicación de optimización de rutas usando Streamlit y OR-Tools.
+Aplicación desarrollada en Python y Streamlit para optimizar rutas de distribución logística en el Valle de Aburrá.
 
-## Tecnologías utilizadas
+## Funcionalidades
+
+- Optimización automática de rutas
+- Configuración dinámica de vehículos
+- Configuración de capacidades
+- Simulación de demandas
+- Alertas de sobrecarga
+- Visualización gráfica de rutas
+- Métricas logísticas
+
+## Tecnologías Utilizadas
 
 - Python
 - Streamlit
@@ -10,22 +21,21 @@ Aplicación de optimización de rutas usando Streamlit y OR-Tools.
 - Pandas
 - Matplotlib
 
-## Descripción
-
-Este proyecto resuelve un problema de logística de última milla
-(CVRP - Capacitated Vehicle Routing Problem)
-para la empresa Expreso de la Montaña ubicada en el Valle de Aburrá.
-
-El sistema optimiza rutas considerando:
-
-- capacidad de vehículos
-- demanda de clientes
-- minimización de distancias
-- utilización de carga
-
-## Ejecutar localmente
-
-Instalar dependencias:
+## Instalación
 
 ```bash
 pip install -r requirements.txt
+````
+
+## Ejecutar aplicación
+
+```bash
+streamlit run app.py
+```
+
+## Autor
+
+Proyecto académico de optimización logística y distribución de última milla.
+
+```
+```
