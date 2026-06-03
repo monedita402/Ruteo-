@@ -7,7 +7,7 @@ from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
 # ============================================================
-# CONFIGURACIÓN
+# CONFIGURACIÓN GENERAL
 # ============================================================
 
 st.set_page_config(
@@ -30,7 +30,7 @@ if "clientes" not in st.session_state:
     st.session_state.clientes = []
 
 # ============================================================
-# SIDEBAR CONFIGURACIÓN
+# SIDEBAR CONFIG
 # ============================================================
 
 st.sidebar.header("⚙️ Configuración")
@@ -73,25 +73,38 @@ if st.sidebar.button("➕ Agregar Cliente"):
     })
 
 # ============================================================
-# MOSTRAR DATOS
+# TABLAS (CEDIS Y CLIENTES)
 # ============================================================
 
 st.subheader("🏢 CEDIs")
-st.write(st.session_state.cedis)
+
+cedis_df = pd.DataFrame(st.session_state.cedis)
+cedis_df["lat"] = cedis_df["coord"].apply(lambda x: x[0])
+cedis_df["lon"] = cedis_df["coord"].apply(lambda x: x[1])
+cedis_df = cedis_df.drop(columns=["coord"])
+
+st.dataframe(cedis_df, use_container_width=True)
 
 st.subheader("📦 Clientes")
-st.write(st.session_state.clientes)
+
+clientes_df = pd.DataFrame(st.session_state.clientes)
+
+if len(clientes_df) > 0:
+    clientes_df["lat"] = clientes_df["coord"].apply(lambda x: x[0])
+    clientes_df["lon"] = clientes_df["coord"].apply(lambda x: x[1])
+    clientes_df = clientes_df.drop(columns=["coord"])
+    st.dataframe(clientes_df, use_container_width=True)
 
 # ============================================================
 # VALIDACIÓN
 # ============================================================
 
 if len(st.session_state.clientes) == 0:
-    st.warning("Agrega al menos un cliente para optimizar rutas")
+    st.warning("⚠️ Agrega al menos un cliente")
     st.stop()
 
 # ============================================================
-# SELECCIÓN CEDI BASE
+# CEDI BASE
 # ============================================================
 
 cedi_base = st.sidebar.selectbox(
@@ -100,7 +113,7 @@ cedi_base = st.sidebar.selectbox(
 )
 
 # ============================================================
-# CONSTRUIR MODELO
+# CONSTRUCCIÓN MODELO
 # ============================================================
 
 coordenadas = []
@@ -128,14 +141,13 @@ depot_index = nombres.index(cedi_base)
 def distancia(a, b):
     return int(math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2) * 111000)
 
-# matriz
 matriz = [
     [distancia(i, j) for j in coordenadas]
     for i in coordenadas
 ]
 
 # ============================================================
-# MODELO OR-TOOLS
+# OR-TOOLS MODEL
 # ============================================================
 
 manager = pywrapcp.RoutingIndexManager(
@@ -153,16 +165,14 @@ def callback(i, j):
         manager.IndexToNode(j)
     ]
 
-transit = routing.RegisterTransitCallback(callback)
-routing.SetArcCostEvaluatorOfAllVehicles(transit)
+transit_callback = routing.RegisterTransitCallback(callback)
+routing.SetArcCostEvaluatorOfAllVehicles(transit_callback)
 
-def demand(i):
+def demand_callback(i):
     return demandas[manager.IndexToNode(i)]
 
-demand_callback = routing.RegisterUnaryTransitCallback(demand)
-
 routing.AddDimensionWithVehicleCapacity(
-    demand_callback,
+    routing.RegisterUnaryTransitCallback(demand_callback),
     0,
     [capacidad] * num_vehiculos,
     True,
@@ -182,7 +192,7 @@ solution = routing.SolveWithParameters(params)
 
 if solution:
 
-    st.success("Optimización exitosa 🚀")
+    st.success("🚀 Optimización completada")
 
     resultados = []
 
@@ -220,7 +230,7 @@ if solution:
         resultados.append({
             "Vehículo": v + 1,
             "Ruta": " → ".join(ruta),
-            "Carga": carga,
+            "Carga (kg)": carga,
             "Utilización %": round((carga / capacidad) * 100, 2),
             "Distancia km": round(distancia_total / 1000, 2)
         })
@@ -254,4 +264,4 @@ if solution:
     st.pyplot(fig)
 
 else:
-    st.error("No se encontró solución")
+    st.error("❌ No se encontró solución")
