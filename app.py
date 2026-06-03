@@ -1,3 +1,4 @@
+```python
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -6,25 +7,74 @@ import streamlit as st
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
-
 # ============================================================
-# CONFIGURACIÓN STREAMLIT
+# CONFIGURACIÓN
 # ============================================================
 
 st.set_page_config(
-    page_title="CVRP - Expreso de la Montaña",
+    page_title="Optimización Logística",
     layout="wide"
 )
 
-st.title("🚚 Optimización de Rutas - Expreso de la Montaña")
-st.subheader("Modelo CVRP para logística de última milla en el Valle de Aburrá")
-
+st.title("🚚 Sistema de Optimización Logística")
+st.subheader("Distribución Inteligente de Rutas - Expreso de la Montaña")
 
 # ============================================================
-# FUNCIÓN DISTANCIA
+# SIDEBAR
 # ============================================================
 
-def calcular_distancia_euclidiana(coord1, coord2):
+st.sidebar.header("Configuración de Simulación")
+
+num_vehiculos = st.sidebar.number_input(
+    "Cantidad de Vehículos",
+    min_value=1,
+    max_value=10,
+    value=2
+)
+
+capacidad_vehiculo = st.sidebar.number_input(
+    "Capacidad por Vehículo (kg)",
+    min_value=500,
+    max_value=10000,
+    value=4000
+)
+
+# ============================================================
+# DATOS CLIENTES
+# ============================================================
+
+st.sidebar.subheader("Demandas de Clientes")
+
+demanda_poblado = st.sidebar.number_input(
+    "El Poblado",
+    value=1800
+)
+
+demanda_envigado = st.sidebar.number_input(
+    "Envigado",
+    value=1200
+)
+
+demanda_itagui = st.sidebar.number_input(
+    "Itagüí",
+    value=1500
+)
+
+demanda_bello = st.sidebar.number_input(
+    "Bello",
+    value=2200
+)
+
+demanda_laureles = st.sidebar.number_input(
+    "Laureles",
+    value=900
+)
+
+# ============================================================
+# DISTANCIA
+# ============================================================
+
+def calcular_distancia(coord1, coord2):
 
     lat1, lon1 = coord1
     lat2, lon2 = coord2
@@ -32,20 +82,17 @@ def calcular_distancia_euclidiana(coord1, coord2):
     delta_lat = lat2 - lat1
     delta_lon = lon2 - lon1
 
-    distancia_grados = math.sqrt(
+    distancia = math.sqrt(
         delta_lat**2 + delta_lon**2
     )
 
-    distancia_metros = distancia_grados * 111000
-
-    return int(distancia_metros)
-
+    return int(distancia * 111000)
 
 # ============================================================
-# MODELO DE DATOS
+# MODELO
 # ============================================================
 
-def crear_modelo_datos():
+def crear_datos():
 
     datos = {}
 
@@ -60,7 +107,7 @@ def crear_modelo_datos():
 
     ]
 
-    datos['nombres_nodos'] = [
+    datos['nombres'] = [
 
         "CEDI Sabaneta",
         "El Poblado",
@@ -74,60 +121,133 @@ def crear_modelo_datos():
     datos['demandas'] = [
 
         0,
-        1800,
-        1200,
-        1500,
-        2200,
-        900
+        demanda_poblado,
+        demanda_envigado,
+        demanda_itagui,
+        demanda_bello,
+        demanda_laureles
 
     ]
 
-    datos['capacidades_vehiculos'] = [
+    datos['num_vehiculos'] = num_vehiculos
 
-        4000,
-        4000
-
-    ]
-
-    datos['num_vehiculos'] = 2
+    datos['capacidades'] = [
+        capacidad_vehiculo
+    ] * num_vehiculos
 
     datos['deposito'] = 0
 
-    matriz_distancias = []
+    # MATRIZ DISTANCIAS
 
-    num_puntos = len(datos['coordenadas'])
+    matriz = []
 
-    for i in range(num_puntos):
+    for i in range(len(datos['coordenadas'])):
 
         fila = []
 
-        for j in range(num_puntos):
+        for j in range(len(datos['coordenadas'])):
 
-            distancia = calcular_distancia_euclidiana(
+            distancia = calcular_distancia(
                 datos['coordenadas'][i],
                 datos['coordenadas'][j]
             )
 
             fila.append(distancia)
 
-        matriz_distancias.append(fila)
+        matriz.append(fila)
 
-    datos['matriz_distancias'] = matriz_distancias
+    datos['matriz'] = matriz
 
     return datos
 
+# ============================================================
+# RESOLVER MODELO
+# ============================================================
+
+def resolver():
+
+    datos = crear_datos()
+
+    manager = pywrapcp.RoutingIndexManager(
+
+        len(datos['matriz']),
+        datos['num_vehiculos'],
+        datos['deposito']
+
+    )
+
+    routing = pywrapcp.RoutingModel(manager)
+
+    # DISTANCIA
+
+    def distancia_callback(desde, hacia):
+
+        desde_nodo = manager.IndexToNode(desde)
+        hacia_nodo = manager.IndexToNode(hacia)
+
+        return datos['matriz'][desde_nodo][hacia_nodo]
+
+    transit_callback = routing.RegisterTransitCallback(
+        distancia_callback
+    )
+
+    routing.SetArcCostEvaluatorOfAllVehicles(
+        transit_callback
+    )
+
+    # DEMANDA
+
+    def demanda_callback(desde):
+
+        desde_nodo = manager.IndexToNode(desde)
+
+        return datos['demandas'][desde_nodo]
+
+    demand_callback = routing.RegisterUnaryTransitCallback(
+        demanda_callback
+    )
+
+    routing.AddDimensionWithVehicleCapacity(
+
+        demand_callback,
+        0,
+        datos['capacidades'],
+        True,
+        'Capacidad'
+
+    )
+
+    # BÚSQUEDA
+
+    parametros = pywrapcp.DefaultRoutingSearchParameters()
+
+    parametros.first_solution_strategy = (
+
+        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+    )
+
+    parametros.local_search_metaheuristic = (
+
+        routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+    )
+
+    parametros.time_limit.seconds = 10
+
+    solucion = routing.SolveWithParameters(parametros)
+
+    return datos, solucion, manager, routing
 
 # ============================================================
 # EXTRAER RUTAS
 # ============================================================
 
-def extraer_rutas(data, manager, routing, solution):
+def obtener_rutas(datos, manager, routing, solucion):
 
     rutas = []
 
-    for vehiculo_id in range(data['num_vehiculos']):
+    for vehiculo in range(datos['num_vehiculos']):
 
-        index = routing.Start(vehiculo_id)
+        index = routing.Start(vehiculo)
 
         ruta = []
 
@@ -139,181 +259,138 @@ def extraer_rutas(data, manager, routing, solution):
 
             ruta.append(nodo)
 
-            indice_anterior = index
+            previo = index
 
-            index = solution.Value(
+            index = solucion.Value(
                 routing.NextVar(index)
             )
 
             distancia_total += routing.GetArcCostForVehicle(
-                indice_anterior,
+                previo,
                 index,
-                vehiculo_id
+                vehiculo
             )
 
         ruta.append(manager.IndexToNode(index))
 
         rutas.append({
 
-            'vehiculo': vehiculo_id + 1,
-            'ruta': ruta,
-            'distancia': distancia_total
+            "vehiculo": vehiculo + 1,
+            "ruta": ruta,
+            "distancia": distancia_total
 
         })
 
     return rutas
 
-
-# ============================================================
-# RESOLVER MODELO
-# ============================================================
-
-def resolver_modelo():
-
-    datos = crear_modelo_datos()
-
-    manager = pywrapcp.RoutingIndexManager(
-
-        len(datos['matriz_distancias']),
-        datos['num_vehiculos'],
-        datos['deposito']
-
-    )
-
-    routing = pywrapcp.RoutingModel(manager)
-
-    def distancia_callback(desde_index, hacia_index):
-
-        desde_nodo = manager.IndexToNode(desde_index)
-
-        hacia_nodo = manager.IndexToNode(hacia_index)
-
-        return datos['matriz_distancias'][desde_nodo][hacia_nodo]
-
-    transit_callback_index = routing.RegisterTransitCallback(
-        distancia_callback
-    )
-
-    routing.SetArcCostEvaluatorOfAllVehicles(
-        transit_callback_index
-    )
-
-    def demanda_callback(desde_index):
-
-        desde_nodo = manager.IndexToNode(desde_index)
-
-        return datos['demandas'][desde_nodo]
-
-    demand_callback_index = routing.RegisterUnaryTransitCallback(
-        demanda_callback
-    )
-
-    routing.AddDimensionWithVehicleCapacity(
-
-        demand_callback_index,
-        0,
-        datos['capacidades_vehiculos'],
-        True,
-        'Capacidad'
-
-    )
-
-    parametros_busqueda = pywrapcp.DefaultRoutingSearchParameters()
-
-    parametros_busqueda.first_solution_strategy = (
-        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
-    )
-
-    parametros_busqueda.local_search_metaheuristic = (
-        routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-    )
-
-    parametros_busqueda.time_limit.seconds = 10
-
-    solucion = routing.SolveWithParameters(
-        parametros_busqueda
-    )
-
-    return datos, solucion, manager, routing
-
-
 # ============================================================
 # EJECUTAR
 # ============================================================
 
-datos, solucion, manager, routing = resolver_modelo()
+datos, solucion, manager, routing = resolver()
 
 if solucion:
 
-    rutas = extraer_rutas(
+    rutas = obtener_rutas(
         datos,
         manager,
         routing,
         solucion
     )
 
-    st.success("La flota SI es suficiente para cubrir la demanda.")
-
     demanda_total = sum(datos['demandas'])
-    capacidad_total = sum(datos['capacidades_vehiculos'])
+
+    capacidad_total = sum(datos['capacidades'])
+
+    st.success("Optimización realizada correctamente")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric("Demanda Total", f"{demanda_total} kg")
+
+        st.metric(
+            "Demanda Total",
+            f"{demanda_total} kg"
+        )
 
     with col2:
-        st.metric("Capacidad Total", f"{capacidad_total} kg")
+
+        st.metric(
+            "Capacidad Total",
+            f"{capacidad_total} kg"
+        )
 
     resultados = []
 
-    st.subheader("📦 Resultados de Vehículos")
-
     for r in rutas:
 
-        vehiculo = r['vehiculo']
-        ruta = r['ruta']
+        carga = 0
 
-        carga_total = 0
+        nombres = []
 
-        nombres_ruta = []
+        for nodo in r['ruta']:
 
-        for nodo in ruta:
-
-            nombres_ruta.append(
-                datos['nombres_nodos'][nodo]
+            nombres.append(
+                datos['nombres'][nodo]
             )
 
-            carga_total += datos['demandas'][nodo]
+            carga += datos['demandas'][nodo]
 
-        capacidad = datos['capacidades_vehiculos'][vehiculo - 1]
+        capacidad = capacidad_vehiculo
 
         utilizacion = (
-            carga_total / capacidad
+            carga / capacidad
         ) * 100
-
-        distancia_km = r['distancia'] / 1000
 
         resultados.append({
 
-            "Vehículo": vehiculo,
-            "Ruta": " → ".join(nombres_ruta),
-            "Carga (kg)": carga_total,
-            "Capacidad (kg)": capacidad,
-            "Utilización (%)": round(utilizacion, 2),
-            "Distancia (km)": round(distancia_km, 2)
+            "Vehículo": r['vehiculo'],
+            "Ruta": " → ".join(nombres),
+            "Carga": carga,
+            "Utilización %": round(utilizacion, 2),
+            "Distancia km": round(
+                r['distancia'] / 1000,
+                2
+            )
 
         })
 
     df = pd.DataFrame(resultados)
 
-    st.dataframe(df, use_container_width=True)
+    st.subheader("Resultados Logísticos")
 
-    st.subheader("📍 Gráfico de Rutas")
+    st.dataframe(
+        df,
+        use_container_width=True
+    )
+
+    # ALERTAS
+
+    for r in resultados:
+
+        if r["Utilización %"] >= 95:
+
+            st.warning(
+                f"Vehículo {r['Vehículo']} supera el 95% de capacidad"
+            )
+
+    # ========================================================
+    # GRÁFICO
+    # ========================================================
+
+    st.subheader("Mapa de Rutas")
 
     fig, ax = plt.subplots(figsize=(10,8))
 
-    colores = ['blue', 'green']
+    colores = [
+
+        'blue',
+        'green',
+        'red',
+        'orange',
+        'purple'
+
+    ]
 
     for i, coord in enumerate(datos['coordenadas']):
 
@@ -326,7 +403,7 @@ if solucion:
         ax.text(
             coord[1],
             coord[0],
-            datos['nombres_nodos'][i]
+            datos['nombres'][i]
         )
 
     for idx, ruta in enumerate(rutas):
@@ -348,18 +425,19 @@ if solucion:
             x,
             y,
             linewidth=2,
-            color=colores[idx],
+            color=colores[idx % len(colores)],
             label=f'Vehículo {ruta["vehiculo"]}'
         )
 
-    ax.set_title("Rutas Óptimas")
-    ax.set_xlabel("Longitud")
-    ax.set_ylabel("Latitud")
-    ax.legend()
+    ax.set_title("Rutas Optimizadas")
     ax.grid(True)
+    ax.legend()
 
     st.pyplot(fig)
 
 else:
 
-    st.error("No se encontró solución válida.")
+    st.error(
+        "No existe solución con la capacidad configurada"
+    )
+```
