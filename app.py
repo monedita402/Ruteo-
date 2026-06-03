@@ -19,91 +19,184 @@ st.set_page_config(
 )
 
 # ============================================================
-# ESTILO PROFESIONAL
+# ESTILO PROFESIONAL PREMIUM
 # ============================================================
 
 st.markdown("""
 
 <style>
 
-/* Fondo principal */
+/* =========================================================
+FONDO GENERAL
+========================================================= */
 
 .stApp {
 
-    background-color: #0E1117;
-    color: white;
+    background-color: #0B1120;
+    color: #FFFFFF;
 
 }
 
-/* Sidebar */
+/* =========================================================
+SIDEBAR
+========================================================= */
 
 section[data-testid="stSidebar"] {
 
-    background-color: #161B22;
-    border-right: 2px solid #1F2937;
+    background-color: #111827;
+    border-right: 2px solid #1E293B;
 
 }
 
-/* Títulos */
+/* Texto sidebar */
 
-h1, h2, h3 {
+section[data-testid="stSidebar"] * {
 
-    color: #4FA3FF;
+    color: #F9FAFB !important;
 
 }
 
-/* Métricas */
+/* =========================================================
+TÍTULOS
+========================================================= */
+
+h1 {
+
+    color: #FFFFFF !important;
+    font-size: 48px !important;
+    font-weight: 800 !important;
+
+}
+
+h2, h3 {
+
+    color: #60A5FA !important;
+    font-weight: 700 !important;
+
+}
+
+/* =========================================================
+SUBTÍTULOS Y TEXTOS
+========================================================= */
+
+p, label, div {
+
+    color: #E5E7EB;
+
+}
+
+/* =========================================================
+KPIs / MÉTRICAS
+========================================================= */
 
 div[data-testid="metric-container"] {
 
-    background-color: #1E293B;
+    background: linear-gradient(
+        135deg,
+        #1E293B,
+        #0F172A
+    );
+
     border: 1px solid #334155;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.4);
+
+    padding: 25px;
+
+    border-radius: 18px;
+
+    box-shadow: 0px 6px 18px rgba(0,0,0,0.45);
 
 }
 
-/* Dataframe */
+/* Texto métricas */
+
+div[data-testid="metric-container"] label {
+
+    color: #94A3B8 !important;
+    font-size: 15px !important;
+
+}
+
+div[data-testid="metric-container"] div {
+
+    color: white !important;
+    font-size: 30px !important;
+    font-weight: bold !important;
+
+}
+
+/* =========================================================
+TABLAS
+========================================================= */
 
 [data-testid="stDataFrame"] {
 
-    border-radius: 10px;
+    border-radius: 14px;
     overflow: hidden;
+    border: 1px solid #334155;
 
 }
 
-/* Botones */
+/* =========================================================
+BOTONES
+========================================================= */
 
 .stButton>button {
 
-    background-color: #2563EB;
+    background: linear-gradient(
+        135deg,
+        #2563EB,
+        #1D4ED8
+    );
+
     color: white;
-    border-radius: 10px;
+
+    border-radius: 12px;
+
     border: none;
-    padding: 10px 20px;
+
+    padding: 12px 20px;
+
     font-weight: bold;
 
 }
 
 .stButton>button:hover {
 
-    background-color: #1D4ED8;
+    background: linear-gradient(
+        135deg,
+        #1D4ED8,
+        #1E40AF
+    );
 
 }
 
-/* Inputs */
+/* =========================================================
+INPUTS
+========================================================= */
 
-.stNumberInput {
+.stNumberInput input {
 
-    background-color: #111827;
-    border-radius: 10px;
+    background-color: #1E293B !important;
+    color: white !important;
+    border-radius: 10px !important;
 
 }
 
-/* Alertas */
+/* =========================================================
+ALERTAS
+========================================================= */
 
 .stAlert {
+
+    border-radius: 14px;
+
+}
+
+/* =========================================================
+GRÁFICAS
+========================================================= */
+
+canvas {
 
     border-radius: 12px;
 
@@ -513,8 +606,6 @@ if solucion:
 
     )
 
-    # ALERTAS
-
     for r in resultados:
 
         if r["Utilization %"] >= 95:
@@ -549,7 +640,8 @@ if solucion:
 
             coord[1],
             coord[0],
-            s=250
+            s=250,
+            color='white'
 
         )
 
@@ -557,7 +649,8 @@ if solucion:
 
             coord[1],
             coord[0],
-            datos['nombres'][i]
+            datos['nombres'][i],
+            color='white'
 
         )
 
@@ -598,9 +691,9 @@ if solucion:
 
     )
 
-    ax.set_facecolor('#0E1117')
+    ax.set_facecolor('#0B1120')
 
-    fig.patch.set_facecolor('#0E1117')
+    fig.patch.set_facecolor('#0B1120')
 
     ax.tick_params(colors='white')
 
