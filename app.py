@@ -11,48 +11,36 @@ from ortools.constraint_solver import pywrapcp
 # ============================================================
 
 st.set_page_config(
-    page_title="Sistema Logístico Configurable",
+    page_title="Sistema Logístico - Clientes",
     layout="wide"
 )
 
-st.title("🚛 Sistema Inteligente de Logística Configurable")
+st.title("🚛 Sistema Inteligente de Logística (CEDI Sabaneta)")
 
 # ============================================================
-# SESSION STATE
+# CEDI FIJO
 # ============================================================
 
-if "cedis" not in st.session_state:
-    st.session_state.cedis = [
-        {"nombre": "CEDI Sabaneta", "coord": [6.151, -75.615]}
-    ]
+cedi = {
+    "nombre": "CEDI Sabaneta",
+    "coord": [6.151, -75.615]
+}
+
+# ============================================================
+# SESSION STATE (SOLO CLIENTES)
+# ============================================================
 
 if "clientes" not in st.session_state:
     st.session_state.clientes = []
 
 # ============================================================
-# SIDEBAR CONFIG
+# CONFIGURACIÓN
 # ============================================================
 
 st.sidebar.header("⚙️ Configuración")
 
 num_vehiculos = st.sidebar.number_input("Vehículos", 1, 10, 2)
 capacidad = st.sidebar.number_input("Capacidad vehículo", 500, 10000, 4000)
-
-# ============================================================
-# AGREGAR CEDIS
-# ============================================================
-
-st.sidebar.subheader("🏢 Agregar CEDI")
-
-cedi_nombre = st.sidebar.text_input("Nombre CEDI")
-cedi_lat = st.sidebar.number_input("Lat CEDI", value=6.15)
-cedi_lon = st.sidebar.number_input("Lon CEDI", value=-75.61)
-
-if st.sidebar.button("➕ Agregar CEDI"):
-    st.session_state.cedis.append({
-        "nombre": cedi_nombre,
-        "coord": [cedi_lat, cedi_lon]
-    })
 
 # ============================================================
 # AGREGAR CLIENTES
@@ -73,33 +61,17 @@ if st.sidebar.button("➕ Agregar Cliente"):
     })
 
 # ============================================================
-# TABLA UNIFICADA (CEDI + CLIENTE)
+# TABLA CLIENTES
 # ============================================================
 
-data_unificada = []
+st.subheader("📦 Clientes")
 
-for c in st.session_state.cedis:
-    data_unificada.append({
-        "Tipo": "CEDI",
-        "Nombre": c["nombre"],
-        "Lat": c["coord"][0],
-        "Lon": c["coord"][1],
-        "Demanda": 0
-    })
-
-for c in st.session_state.clientes:
-    data_unificada.append({
-        "Tipo": "Cliente",
-        "Nombre": c["nombre"],
-        "Lat": c["coord"][0],
-        "Lon": c["coord"][1],
-        "Demanda": c["demanda"]
-    })
-
-df = pd.DataFrame(data_unificada)
-
-st.subheader("📊 Tabla General (CEDI + Clientes)")
-st.dataframe(df, use_container_width=True)
+if len(st.session_state.clientes) > 0:
+    clientes_df = pd.DataFrame(st.session_state.clientes)
+    clientes_df["Lat"] = clientes_df["coord"].apply(lambda x: x[0])
+    clientes_df["Lon"] = clientes_df["coord"].apply(lambda x: x[1])
+    clientes_df = clientes_df.drop(columns=["coord"])
+    st.dataframe(clientes_df, use_container_width=True)
 
 # ============================================================
 # VALIDACIÓN
@@ -110,33 +82,19 @@ if len(st.session_state.clientes) == 0:
     st.stop()
 
 # ============================================================
-# CEDI BASE
-# ============================================================
-
-cedi_base = st.sidebar.selectbox(
-    "CEDI base",
-    [c["nombre"] for c in st.session_state.cedis]
-)
-
-# ============================================================
 # MODELO
 # ============================================================
 
-coordenadas = []
-nombres = []
-demandas = []
-
-for c in st.session_state.cedis:
-    coordenadas.append(c["coord"])
-    nombres.append(c["nombre"])
-    demandas.append(0)
+coordenadas = [cedi["coord"]]
+nombres = [cedi["nombre"]]
+demandas = [0]
 
 for c in st.session_state.clientes:
     coordenadas.append(c["coord"])
     nombres.append(c["nombre"])
     demandas.append(c["demanda"])
 
-depot_index = nombres.index(cedi_base)
+depot_index = 0  # CEDI fijo
 
 # ============================================================
 # DISTANCIA
@@ -192,7 +150,7 @@ params.first_solution_strategy = (
 solution = routing.SolveWithParameters(params)
 
 # ============================================================
-# RESULTADOS + PLANO CARTESIANO
+# RESULTADOS + MAPA
 # ============================================================
 
 if solution:
@@ -203,16 +161,30 @@ if solution:
 
     fig, ax = plt.subplots(figsize=(10, 7))
 
-    ax.set_title("Plano Cartesiano Logístico")
+    ax.set_title("Plano Logístico - CEDI Sabaneta")
     ax.set_xlabel("Longitud (Lon)")
     ax.set_ylabel("Latitud (Lat)")
 
-    # nodos
-    for i, c in enumerate(coordenadas):
-        ax.scatter(c[1], c[0], s=200)
-        ax.text(c[1], c[0], nombres[i])
-
     colors = ["cyan", "lime", "orange", "magenta", "yellow"]
+
+    # CEDI
+    ax.scatter(
+        cedi["coord"][1],
+        cedi["coord"][0],
+        s=300,
+        color="red"
+    )
+    ax.text(
+        cedi["coord"][1],
+        cedi["coord"][0],
+        cedi["nombre"],
+        color="red"
+    )
+
+    # CLIENTES
+    for i, c in enumerate(st.session_state.clientes, start=1):
+        ax.scatter(c["coord"][1], c["coord"][0], s=150)
+        ax.text(c["coord"][1], c["coord"][0], c["nombre"])
 
     for v in range(num_vehiculos):
 
@@ -234,7 +206,7 @@ if solution:
                 prev, index, v
             )
 
-        ruta.append(cedi_base)
+        ruta.append(cedi["nombre"])
 
         resultados.append({
             "Vehículo": v + 1,
@@ -251,8 +223,8 @@ if solution:
             x.append(coordenadas[idx][1])
             y.append(coordenadas[idx][0])
 
-        x.append(coordenadas[depot_index][1])
-        y.append(coordenadas[depot_index][0])
+        x.append(cedi["coord"][1])
+        y.append(cedi["coord"][0])
 
         ax.plot(
             x, y,
