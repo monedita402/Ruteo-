@@ -824,6 +824,127 @@ if solucion:
     ax.grid(True)
 
     st.pyplot(fig)
+    
+    id="z6w9oc"
+# ============================================================
+# FOOTER / CRÉDITOS PROFESIONALES
+# ============================================================
+
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+st.markdown("""
+
+<hr style="
+    border:1px solid #334155;
+    margin-top:40px;
+    margin-bottom:30px;
+">
+
+<div style="
+
+    text-align:center;
+
+    padding:30px;
+
+    border-radius:20px;
+
+    background: linear-gradient(
+        135deg,
+        #111827,
+        #0F172A
+    );
+
+    border:1px solid #334155;
+
+    box-shadow:
+        0px 4px 15px rgba(0,0,0,0.35),
+        0px 0px 12px rgba(96,165,250,0.10);
+
+">
+
+<h2 style="
+    color:#60A5FA;
+    margin-bottom:25px;
+    font-size:30px;
+">
+
+👨‍💻 Autores del Proyecto
+
+</h2>
+
+<!-- AUTOR 1 -->
+
+<div style="
+    margin-bottom:25px;
+">
+
+<p style="
+    color:white;
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:8px;
+">
+
+Miguel Ángel Monedero Aguado
+
+</p>
+
+<p style="
+    color:#CBD5E1;
+    font-size:18px;
+">
+
+📞 31843741842
+
+</p>
+
+</div>
+
+<!-- AUTOR 2 -->
+
+<div style="
+    margin-bottom:25px;
+">
+
+<p style="
+    color:white;
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:8px;
+">
+
+Cristhyan Felipe Uran España
+
+</p>
+
+<p style="
+    color:#CBD5E1;
+    font-size:18px;
+">
+
+📞 3105482523
+
+</p>
+
+</div>
+
+<!-- DESCRIPCIÓN -->
+
+<p style="
+    color:#94A3B8;
+    font-size:15px;
+    margin-top:20px;
+">
+
+Sistema Inteligente de Logística •
+Optimización de Rutas •
+Python • Streamlit • OR-Tools
+
+</p>
+
+</div>
+
+""", unsafe_allow_html=True)
 
 else:
 
