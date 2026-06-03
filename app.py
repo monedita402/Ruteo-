@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # ============================================================
-# CSS PREMIUM
+# CSS PREMIUM + FIX IDIOMA + BOTONES
 # ============================================================
 
 st.markdown("""
@@ -39,6 +39,21 @@ section[data-testid="stSidebar"] div {
     color: #FFFFFF !important;
 }
 
+/* FIX IDIOMA VISIBILIDAD */
+.stSelectbox div[data-baseweb="select"] {
+    background-color: #1E293B !important;
+    color: white !important;
+}
+
+.stSelectbox span {
+    color: white !important;
+}
+
+div[role="option"] {
+    color: black !important;
+}
+
+/* INPUTS */
 .stNumberInput input {
     background-color: #1E293B !important;
     color: white !important;
@@ -46,6 +61,21 @@ section[data-testid="stSidebar"] div {
     border: 1px solid #334155 !important;
 }
 
+/* BOTONES */
+.stButton > button {
+    background-color: #1E293B !important;
+    color: white !important;
+    border-radius: 10px !important;
+    border: 1px solid #334155 !important;
+    transition: 0.3s;
+}
+
+.stButton > button:hover {
+    background-color: #2563EB !important;
+    transform: scale(1.03);
+}
+
+/* TITULOS */
 h1 {
     color: white !important;
     font-size: 48px !important;
@@ -121,7 +151,7 @@ demanda_bello = st.sidebar.number_input("Bello", value=2200)
 demanda_laureles = st.sidebar.number_input("Laureles", value=900)
 
 # ============================================================
-# 🚀 CLIENTES DINÁMICOS (AGREGAR / ELIMINAR) - NUEVO
+# CLIENTES DINÁMICOS
 # ============================================================
 
 st.sidebar.markdown("---")
@@ -132,7 +162,6 @@ if "clientes" not in st.session_state:
 
 cli_nombre = st.sidebar.text_input("Nombre Cliente")
 cli_demanda = st.sidebar.number_input("Demanda Cliente", value=100)
-
 cli_lat = st.sidebar.number_input("Lat Cliente", value=6.200, format="%.3f", step=0.001)
 cli_lon = st.sidebar.number_input("Lon Cliente", value=-75.600, format="%.3f", step=0.001)
 
@@ -162,7 +191,7 @@ if len(st.session_state.clientes) > 0:
         st.rerun()
 
 # ============================================================
-# DATOS (CEDI FIJO + CLIENTES DINÁMICOS)
+# DATOS BASE
 # ============================================================
 
 coordenadas = [
@@ -192,11 +221,37 @@ demandas = [
     demanda_laureles
 ]
 
-# ➕ CLIENTES DINÁMICOS SE AGREGAN AL MODELO SIN TOCAR TU BASE
+# ============================================================
+# CLIENTES DINÁMICOS AL MODELO
+# ============================================================
+
 for c in st.session_state.clientes:
     coordenadas.append(c["coord"])
     nombres.append(c["nombre"])
     demandas.append(c["demanda"])
+
+# ============================================================
+# TABLA CLIENTES (FIJOS + DINÁMICOS)
+# ============================================================
+
+clientes_fijos = [
+    {"nombre": "El Poblado", "demanda": demanda_poblado},
+    {"nombre": "Envigado", "demanda": demanda_envigado},
+    {"nombre": "Itagüí", "demanda": demanda_itagui},
+    {"nombre": "Bello", "demanda": demanda_bello},
+    {"nombre": "Laureles", "demanda": demanda_laureles},
+]
+
+tabla = []
+
+for c in clientes_fijos:
+    tabla.append({"Tipo": "Fijo", "Nombre": c["nombre"], "Demanda": c["demanda"]})
+
+for c in st.session_state.clientes:
+    tabla.append({"Tipo": "Dinámico", "Nombre": c["nombre"], "Demanda": c["demanda"]})
+
+st.subheader("📋 Clientes (Fijos + Dinámicos)")
+st.dataframe(pd.DataFrame(tabla), use_container_width=True)
 
 # ============================================================
 # DISTANCIA
