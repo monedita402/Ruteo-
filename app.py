@@ -7,7 +7,7 @@ from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
 # ============================================================
-# CONFIGURACIÓN GENERAL
+# CONFIGURACIÓN
 # ============================================================
 
 st.set_page_config(
@@ -39,7 +39,7 @@ num_vehiculos = st.sidebar.number_input("Vehículos", 1, 10, 2)
 capacidad = st.sidebar.number_input("Capacidad vehículo", 500, 10000, 4000)
 
 # ============================================================
-# CEDIS DINÁMICOS
+# AGREGAR CEDIS
 # ============================================================
 
 st.sidebar.subheader("🏢 Agregar CEDI")
@@ -55,7 +55,7 @@ if st.sidebar.button("➕ Agregar CEDI"):
     })
 
 # ============================================================
-# CLIENTES DINÁMICOS
+# AGREGAR CLIENTES
 # ============================================================
 
 st.sidebar.subheader("📦 Agregar Cliente")
@@ -73,27 +73,33 @@ if st.sidebar.button("➕ Agregar Cliente"):
     })
 
 # ============================================================
-# TABLAS (CEDIS Y CLIENTES)
+# TABLA UNIFICADA (CEDI + CLIENTE)
 # ============================================================
 
-st.subheader("🏢 CEDIs")
+data_unificada = []
 
-cedis_df = pd.DataFrame(st.session_state.cedis)
-cedis_df["lat"] = cedis_df["coord"].apply(lambda x: x[0])
-cedis_df["lon"] = cedis_df["coord"].apply(lambda x: x[1])
-cedis_df = cedis_df.drop(columns=["coord"])
+for c in st.session_state.cedis:
+    data_unificada.append({
+        "Tipo": "CEDI",
+        "Nombre": c["nombre"],
+        "Lat": c["coord"][0],
+        "Lon": c["coord"][1],
+        "Demanda": 0
+    })
 
-st.dataframe(cedis_df, use_container_width=True)
+for c in st.session_state.clientes:
+    data_unificada.append({
+        "Tipo": "Cliente",
+        "Nombre": c["nombre"],
+        "Lat": c["coord"][0],
+        "Lon": c["coord"][1],
+        "Demanda": c["demanda"]
+    })
 
-st.subheader("📦 Clientes")
+df = pd.DataFrame(data_unificada)
 
-clientes_df = pd.DataFrame(st.session_state.clientes)
-
-if len(clientes_df) > 0:
-    clientes_df["lat"] = clientes_df["coord"].apply(lambda x: x[0])
-    clientes_df["lon"] = clientes_df["coord"].apply(lambda x: x[1])
-    clientes_df = clientes_df.drop(columns=["coord"])
-    st.dataframe(clientes_df, use_container_width=True)
+st.subheader("📊 Tabla General (CEDI + Clientes)")
+st.dataframe(df, use_container_width=True)
 
 # ============================================================
 # VALIDACIÓN
@@ -113,20 +119,18 @@ cedi_base = st.sidebar.selectbox(
 )
 
 # ============================================================
-# CONSTRUCCIÓN MODELO
+# MODELO
 # ============================================================
 
 coordenadas = []
 nombres = []
 demandas = []
 
-# CEDIs
 for c in st.session_state.cedis:
     coordenadas.append(c["coord"])
     nombres.append(c["nombre"])
     demandas.append(0)
 
-# Clientes
 for c in st.session_state.clientes:
     coordenadas.append(c["coord"])
     nombres.append(c["nombre"])
@@ -147,7 +151,7 @@ matriz = [
 ]
 
 # ============================================================
-# OR-TOOLS MODEL
+# OR-TOOLS
 # ============================================================
 
 manager = pywrapcp.RoutingIndexManager(
@@ -165,14 +169,15 @@ def callback(i, j):
         manager.IndexToNode(j)
     ]
 
-transit_callback = routing.RegisterTransitCallback(callback)
-routing.SetArcCostEvaluatorOfAllVehicles(transit_callback)
+routing.SetArcCostEvaluatorOfAllVehicles(
+    routing.RegisterTransitCallback(callback)
+)
 
-def demand_callback(i):
+def demand(i):
     return demandas[manager.IndexToNode(i)]
 
 routing.AddDimensionWithVehicleCapacity(
-    routing.RegisterUnaryTransitCallback(demand_callback),
+    routing.RegisterUnaryTransitCallback(demand),
     0,
     [capacidad] * num_vehiculos,
     True,
@@ -187,7 +192,7 @@ params.first_solution_strategy = (
 solution = routing.SolveWithParameters(params)
 
 # ============================================================
-# RESULTADOS
+# RESULTADOS + PLANO CARTESIANO
 # ============================================================
 
 if solution:
@@ -198,12 +203,16 @@ if solution:
 
     fig, ax = plt.subplots(figsize=(10, 7))
 
-    colors = ["cyan", "lime", "orange", "magenta", "yellow"]
+    ax.set_title("Plano Cartesiano Logístico")
+    ax.set_xlabel("Longitud (Lon)")
+    ax.set_ylabel("Latitud (Lat)")
 
     # nodos
     for i, c in enumerate(coordenadas):
-        ax.scatter(c[1], c[0], s=200, color="white")
-        ax.text(c[1], c[0], nombres[i], color="white")
+        ax.scatter(c[1], c[0], s=200)
+        ax.text(c[1], c[0], nombres[i])
+
+    colors = ["cyan", "lime", "orange", "magenta", "yellow"]
 
     for v in range(num_vehiculos):
 
@@ -230,7 +239,7 @@ if solution:
         resultados.append({
             "Vehículo": v + 1,
             "Ruta": " → ".join(ruta),
-            "Carga (kg)": carga,
+            "Carga": carga,
             "Utilización %": round((carga / capacidad) * 100, 2),
             "Distancia km": round(distancia_total / 1000, 2)
         })
@@ -255,11 +264,9 @@ if solution:
     st.subheader("📊 Resultados")
     st.dataframe(pd.DataFrame(resultados), use_container_width=True)
 
-    st.subheader("🗺️ Rutas")
-    ax.set_facecolor("#0B1120")
-    fig.patch.set_facecolor("#0B1120")
-    ax.legend()
+    st.subheader("🗺️ Plano cartesiano")
     ax.grid(True)
+    ax.legend()
 
     st.pyplot(fig)
 
