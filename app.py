@@ -7,156 +7,175 @@ from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
 # ============================================================
-# CONFIGURACIÓN
+# CONFIGURACIÓN GENERAL
 # ============================================================
 
 st.set_page_config(
-    page_title="Sistema Logístico - Clientes",
+    page_title="Sistema Inteligente de Logística",
     layout="wide"
 )
 
-st.title("🚛 Sistema Inteligente de Logística (CEDI Sabaneta)")
-
 # ============================================================
-# CEDI FIJO
+# CSS PREMIUM (TU ORIGINAL)
 # ============================================================
 
-cedi = {
-    "nombre": "CEDI Sabaneta",
-    "coord": [6.151, -75.615]
+st.markdown("""
+<style>
+.stApp {
+    background-color: #0B1120;
+    color: white;
 }
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg,#0F172A,#111827);
+    border-right: 2px solid #1E293B;
+}
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] div {
+    color: #FFFFFF !important;
+}
+.stNumberInput input {
+    background-color: #1E293B !important;
+    color: white !important;
+    border-radius: 10px !important;
+    border: 1px solid #334155 !important;
+}
+h1 {
+    color: white !important;
+    font-size: 48px !important;
+    font-weight: 800 !important;
+}
+h2, h3 {
+    color: #60A5FA !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ============================================================
-# SESSION STATE
+# IDIOMA
 # ============================================================
 
-if "clientes" not in st.session_state:
-    st.session_state.clientes = []
-
-# ============================================================
-# SIDEBAR CONFIG
-# ============================================================
-
-st.sidebar.header("⚙️ Configuración")
-
-num_vehiculos = st.sidebar.number_input("Vehículos", 1, 10, 2)
-capacidad = st.sidebar.number_input("Capacidad vehículo", 500, 10000, 4000)
-
-# ============================================================
-# AGREGAR CLIENTES (3 DECIMALES)
-# ============================================================
-
-st.sidebar.subheader("📦 Agregar Cliente")
-
-cli_nombre = st.sidebar.text_input("Nombre Cliente")
-
-cli_demanda = st.sidebar.number_input("Demanda", value=100)
-
-cli_lat = st.sidebar.number_input(
-    "Lat Cliente",
-    value=6.200,
-    format="%.3f",
-    step=0.001
+idioma = st.sidebar.selectbox(
+    "🌎 Idioma / Language",
+    ["Español", "English"]
 )
 
-cli_lon = st.sidebar.number_input(
-    "Lon Cliente",
-    value=-75.600,
-    format="%.3f",
-    step=0.001
-)
+if idioma == "Español":
 
-if st.sidebar.button("➕ Agregar Cliente"):
-    if cli_nombre != "":
-        st.session_state.clientes.append({
-            "nombre": cli_nombre,
-            "demanda": cli_demanda,
-            "coord": [cli_lat, cli_lon]
-        })
+    TITULO = "🚛 Sistema Inteligente de Logística"
+    SUBTITULO = "Optimización Avanzada de Transporte y Rutas"
+    CONFIG = "⚙️ Configuración"
+    VEHICULOS = "Cantidad de Vehículos"
+    CAPACIDAD = "Capacidad Vehículo (kg)"
+    DEMANDAS = "📦 Demandas"
+    RESULTADOS = "📊 Resultados"
+    MAPA = "🗺️ Visualización de Rutas"
+    EXITO = "Optimización realizada correctamente"
+    ERROR = "No existe solución válida"
 
-# ============================================================
-# ELIMINAR CLIENTE
-# ============================================================
+else:
 
-st.sidebar.subheader("🗑️ Eliminar Cliente")
-
-if len(st.session_state.clientes) > 0:
-
-    cliente_a_borrar = st.sidebar.selectbox(
-        "Selecciona cliente",
-        [c["nombre"] for c in st.session_state.clientes]
-    )
-
-    if st.sidebar.button("❌ Eliminar cliente"):
-        st.session_state.clientes = [
-            c for c in st.session_state.clientes
-            if c["nombre"] != cliente_a_borrar
-        ]
-        st.rerun()
+    TITULO = "🚛 Logistic Intelligence System"
+    SUBTITULO = "Advanced Transportation & Route Optimization"
+    CONFIG = "⚙️ Configuration"
+    VEHICULOS = "Number of Vehicles"
+    CAPACIDAD = "Vehicle Capacity"
+    DEMANDAS = "📦 Demands"
+    RESULTADOS = "📊 Results"
+    MAPA = "🗺️ Route Visualization"
+    EXITO = "Optimization completed successfully"
+    ERROR = "No feasible solution"
 
 # ============================================================
-# TABLA CLIENTES
+# TÍTULOS
 # ============================================================
 
-st.subheader("📦 Clientes")
-
-if len(st.session_state.clientes) > 0:
-
-    clientes_df = pd.DataFrame(st.session_state.clientes)
-    clientes_df["Lat"] = clientes_df["coord"].apply(lambda x: x[0])
-    clientes_df["Lon"] = clientes_df["coord"].apply(lambda x: x[1])
-    clientes_df = clientes_df.drop(columns=["coord"])
-
-    st.dataframe(clientes_df, use_container_width=True)
+st.title(TITULO)
+st.subheader(SUBTITULO)
 
 # ============================================================
-# VALIDACIÓN
+# SIDEBAR
 # ============================================================
 
-if len(st.session_state.clientes) == 0:
-    st.warning("⚠️ Agrega al menos un cliente")
-    st.stop()
+st.sidebar.header(CONFIG)
+
+num_vehiculos = st.sidebar.number_input(VEHICULOS, 1, 10, 2)
+capacidad = st.sidebar.number_input(CAPACIDAD, 500, 10000, 4000)
+
+st.sidebar.subheader(DEMANDAS)
+
+demanda_poblado = st.sidebar.number_input("El Poblado", value=1800)
+demanda_envigado = st.sidebar.number_input("Envigado", value=1200)
+demanda_itagui = st.sidebar.number_input("Itagüí", value=1500)
+demanda_bello = st.sidebar.number_input("Bello", value=2200)
+demanda_laureles = st.sidebar.number_input("Laureles", value=900)
 
 # ============================================================
-# MODELO
+# DATOS
 # ============================================================
 
-coordenadas = [cedi["coord"]]
-nombres = [cedi["nombre"]]
-demandas = [0]
+coordenadas = [
+    [6.151, -75.615],
+    [6.210, -75.571],
+    [6.173, -75.583],
+    [6.172, -75.609],
+    [6.333, -75.558],
+    [6.243, -75.594]
+]
 
-for c in st.session_state.clientes:
-    coordenadas.append(c["coord"])
-    nombres.append(c["nombre"])
-    demandas.append(c["demanda"])
+nombres = [
+    "CEDI Sabaneta",
+    "El Poblado",
+    "Envigado",
+    "Itagüí",
+    "Bello",
+    "Laureles"
+]
 
-depot_index = 0
+demandas = [
+    0,
+    demanda_poblado,
+    demanda_envigado,
+    demanda_itagui,
+    demanda_bello,
+    demanda_laureles
+]
 
 # ============================================================
 # DISTANCIA
 # ============================================================
 
-def distancia(a, b):
-    return int(math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2) * 111000)
+def calcular_distancia(coord1, coord2):
+    lat1, lon1 = coord1
+    lat2, lon2 = coord2
+    return int(math.sqrt((lat2 - lat1)**2 + (lon2 - lon1)**2) * 111000)
+
+# ============================================================
+# MATRIZ
+# ============================================================
 
 matriz = [
-    [distancia(i, j) for j in coordenadas]
-    for i in coordenadas
+    [
+        calcular_distancia(coordenadas[i], coordenadas[j])
+        for j in range(len(coordenadas))
+    ]
+    for i in range(len(coordenadas))
 ]
 
 # ============================================================
-# OR-TOOLS
+# MODELO OR-TOOLS
 # ============================================================
 
 manager = pywrapcp.RoutingIndexManager(
     len(matriz),
     num_vehiculos,
-    depot_index
+    0
 )
 
 routing = pywrapcp.RoutingModel(manager)
 
-def callback(i, j):
+def callback_distancia(i, j):
     return matriz[
         manager.IndexToNode(i)
     ][
@@ -164,14 +183,14 @@ def callback(i, j):
     ]
 
 routing.SetArcCostEvaluatorOfAllVehicles(
-    routing.RegisterTransitCallback(callback)
+    routing.RegisterTransitCallback(callback_distancia)
 )
 
-def demand(i):
+def callback_demanda(i):
     return demandas[manager.IndexToNode(i)]
 
 routing.AddDimensionWithVehicleCapacity(
-    routing.RegisterUnaryTransitCallback(demand),
+    routing.RegisterUnaryTransitCallback(callback_demanda),
     0,
     [capacidad] * num_vehiculos,
     True,
@@ -183,132 +202,122 @@ params.first_solution_strategy = (
     routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
 )
 
-solution = routing.SolveWithParameters(params)
+solucion = routing.SolveWithParameters(params)
 
 # ============================================================
-# RESULTADOS + PLANO CARTESIANO
+# RESULTADOS
 # ============================================================
 
-if solution:
+if solucion:
 
-    st.success("🚀 Optimización completada")
+    st.success(EXITO)
 
     resultados = []
 
-    fig, ax = plt.subplots(figsize=(10, 7))
+    fig, ax = plt.subplots(figsize=(10, 8))
 
-    ax.set_title("Plano Cartesiano Logístico")
-    ax.set_xlabel("Longitud (Lon)")
-    ax.set_ylabel("Latitud (Lat)")
+    colores = ['cyan', 'lime', 'orange', 'magenta', 'yellow']
 
-    # ========================================================
-    # CEDI (NODO PRINCIPAL)
-    # ========================================================
+    # NODOS
+    for i, coord in enumerate(coordenadas):
+        ax.scatter(coord[1], coord[0], s=250, color='white')
+        ax.text(coord[1], coord[0], nombres[i], color='white')
 
-    ax.scatter(
-        cedi["coord"][1],
-        cedi["coord"][0],
-        s=350,
-        color="red"
-    )
-
-    ax.text(
-        cedi["coord"][1],
-        cedi["coord"][0],
-        f"🏭 {cedi['nombre']}",
-        fontsize=11,
-        fontweight="bold",
-        color="red"
-    )
-
-    # ========================================================
-    # CLIENTES (CON NOMBRES Y DEMANDA)
-    # ========================================================
-
-    for c in st.session_state.clientes:
-
-        ax.scatter(
-            c["coord"][1],
-            c["coord"][0],
-            s=180,
-            color="cyan"
-        )
-
-        ax.text(
-            c["coord"][1],
-            c["coord"][0],
-            f"📦 {c['nombre']}\n({c['demanda']} kg)",
-            fontsize=9,
-            fontweight="bold",
-            color="white"
-        )
-
-    # ========================================================
     # RUTAS
-    # ========================================================
+    for vehiculo in range(num_vehiculos):
 
-    colors = ["cyan", "lime", "orange", "magenta", "yellow"]
-
-    for v in range(num_vehiculos):
-
-        index = routing.Start(v)
+        index = routing.Start(vehiculo)
         ruta = []
         carga = 0
         distancia_total = 0
 
         while not routing.IsEnd(index):
 
-            node = manager.IndexToNode(index)
-            ruta.append(nombres[node])
-            carga += demandas[node]
+            nodo = manager.IndexToNode(index)
+            ruta.append(nombres[nodo])
+            carga += demandas[nodo]
 
             prev = index
-            index = solution.Value(routing.NextVar(index))
+            index = solucion.Value(routing.NextVar(index))
 
             distancia_total += routing.GetArcCostForVehicle(
-                prev, index, v
+                prev, index, vehiculo
             )
 
-        ruta.append(cedi["nombre"])
+        ruta.append("CEDI Sabaneta")
 
         resultados.append({
-            "Vehículo": v + 1,
+            "Vehículo": vehiculo + 1,
             "Ruta": " → ".join(ruta),
             "Carga (kg)": carga,
             "Utilización %": round((carga / capacidad) * 100, 2),
-            "Distancia km": round(distancia_total / 1000, 2)
+            "Distancia (km)": round(distancia_total / 1000, 2)
         })
 
         x, y = [], []
 
         for p in ruta[:-1]:
             idx = nombres.index(p)
-            x.append(coordenadas[idx][1])
             y.append(coordenadas[idx][0])
+            x.append(coordenadas[idx][1])
 
-        x.append(cedi["coord"][1])
-        y.append(cedi["coord"][0])
+        x.append(coordenadas[0][1])
+        y.append(coordenadas[0][0])
 
         ax.plot(
-            x,
-            y,
+            x, y,
             linewidth=3,
-            color=colors[v % len(colors)],
-            label=f"Vehículo {v+1}"
+            color=colores[vehiculo % len(colores)]
         )
 
-    # ========================================================
-    # RESULTADOS
-    # ========================================================
-
-    st.subheader("📊 Resultados")
+    st.subheader(RESULTADOS)
     st.dataframe(pd.DataFrame(resultados), use_container_width=True)
 
-    st.subheader("🗺️ Plano cartesiano")
+    st.subheader(MAPA)
+    ax.set_facecolor('#0B1120')
+    fig.patch.set_facecolor('#0B1120')
+    ax.tick_params(colors='white')
     ax.grid(True)
-    ax.legend()
 
     st.pyplot(fig)
 
 else:
-    st.error("❌ No se encontró solución")
+    st.error(ERROR)
+
+# ============================================================
+# FOOTER AUTORES
+# ============================================================
+
+st.markdown("""
+<hr style="border:1px solid #334155; margin-top:40px; margin-bottom:20px;">
+
+<div style='text-align:center; padding:25px;'>
+
+<h2 style="color:#60A5FA;">👨‍💻 Autores del Proyecto</h2>
+
+<p style="color:white; font-size:20px;">
+Miguel Ángel Monedero Aguado
+</p>
+
+<p style="color:#CBD5E1;">
+📞 31843741842
+</p>
+
+<br>
+
+<p style="color:white; font-size:20px;">
+Cristhyan Felipe Uran España
+</p>
+
+<p style="color:#CBD5E1;">
+📞 3105482523
+</p>
+
+<br>
+
+<p style="color:#94A3B8; font-size:14px;">
+Sistema Inteligente de Logística • Streamlit • OR-Tools
+</p>
+
+</div>
+""", unsafe_allow_html=True)
