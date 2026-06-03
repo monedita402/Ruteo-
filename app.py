@@ -7,756 +7,251 @@ from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
 # ============================================================
-# CONFIGURACIÓN GENERAL
+# CONFIGURACIÓN
 # ============================================================
 
 st.set_page_config(
-
-    page_title="Sistema Inteligente de Logística",
+    page_title="Sistema Logístico Configurable",
     layout="wide"
-
 )
 
-# ============================================================
-# CSS PREMIUM
-# ============================================================
-
-st.markdown("""
-
-<style>
-
-/* =========================================================
-FONDO PRINCIPAL
-========================================================= */
-
-.stApp {
-
-    background-color: #0B1120;
-    color: white;
-
-}
-
-/* =========================================================
-SIDEBAR
-========================================================= */
-
-section[data-testid="stSidebar"] {
-
-    background: linear-gradient(
-        180deg,
-        #0F172A,
-        #111827
-    );
-
-    border-right: 2px solid #1E293B;
-
-}
-
-/* =========================================================
-TEXTOS SIDEBAR
-========================================================= */
-
-section[data-testid="stSidebar"] label,
-section[data-testid="stSidebar"] p,
-section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] div {
-
-    color: #FFFFFF !important;
-
-}
-
-/* =========================================================
-SELECTBOX
-========================================================= */
-
-.stSelectbox div[data-baseweb="select"] {
-
-    background-color: #1E293B !important;
-
-    border-radius: 12px !important;
-
-    border: 1px solid #334155 !important;
-
-}
-
-.stSelectbox div[data-baseweb="select"] span {
-
-    color: white !important;
-
-}
-
-div[role="listbox"] {
-
-    background-color: #1E293B !important;
-
-}
-
-div[role="option"] {
-
-    color: white !important;
-
-}
-
-div[role="option"]:hover {
-
-    background-color: #2563EB !important;
-
-}
-
-/* =========================================================
-INPUTS
-========================================================= */
-
-.stNumberInput input {
-
-    background-color: #1E293B !important;
-
-    color: white !important;
-
-    border-radius: 10px !important;
-
-    border: 1px solid #334155 !important;
-
-}
-
-/* =========================================================
-TÍTULOS
-========================================================= */
-
-h1 {
-
-    color: white !important;
-
-    font-size: 48px !important;
-
-    font-weight: 800 !important;
-
-}
-
-h2, h3 {
-
-    color: #60A5FA !important;
-
-}
-
-/* =========================================================
-KPIs
-========================================================= */
-
-div[data-testid="metric-container"] {
-
-    background: linear-gradient(
-        135deg,
-        #1E293B,
-        #0F172A
-    );
-
-    border: 2px solid #475569;
-
-    padding: 28px;
-
-    border-radius: 20px;
-
-    box-shadow:
-        0px 6px 18px rgba(0,0,0,0.45),
-        0px 0px 12px rgba(96,165,250,0.15);
-
-}
-
-/* TÍTULO KPI */
-
-div[data-testid="metric-container"] label {
-
-    color: #FFFFFF !important;
-
-    font-size: 20px !important;
-
-    font-weight: 800 !important;
-
-    opacity: 1 !important;
-
-}
-
-/* VALOR KPI */
-
-div[data-testid="metric-container"] [data-testid="stMetricValue"] {
-
-    color: #FFFFFF !important;
-
-    font-size: 42px !important;
-
-    font-weight: 900 !important;
-
-    opacity: 1 !important;
-
-}
-
-/* =========================================================
-TABLAS
-========================================================= */
-
-[data-testid="stDataFrame"] {
-
-    border-radius: 14px;
-
-    overflow: hidden;
-
-}
-
-/* =========================================================
-ALERTAS
-========================================================= */
-
-.stAlert {
-
-    border-radius: 14px;
-
-}
-
-</style>
-
-""", unsafe_allow_html=True)
+st.title("🚛 Sistema Inteligente de Logística Configurable")
 
 # ============================================================
-# IDIOMA
+# SESSION STATE
 # ============================================================
 
-idioma = st.sidebar.selectbox(
-
-    "🌎 Idioma / Language",
-
-    [
-
-        "Español",
-        "English"
-
+if "cedis" not in st.session_state:
+    st.session_state.cedis = [
+        {"nombre": "CEDI Sabaneta", "coord": [6.151, -75.615]}
     ]
 
+if "clientes" not in st.session_state:
+    st.session_state.clientes = []
+
+# ============================================================
+# SIDEBAR CONFIGURACIÓN
+# ============================================================
+
+st.sidebar.header("⚙️ Configuración")
+
+num_vehiculos = st.sidebar.number_input("Vehículos", 1, 10, 2)
+capacidad = st.sidebar.number_input("Capacidad vehículo", 500, 10000, 4000)
+
+# ============================================================
+# CEDIS DINÁMICOS
+# ============================================================
+
+st.sidebar.subheader("🏢 Agregar CEDI")
+
+cedi_nombre = st.sidebar.text_input("Nombre CEDI")
+cedi_lat = st.sidebar.number_input("Lat CEDI", value=6.15)
+cedi_lon = st.sidebar.number_input("Lon CEDI", value=-75.61)
+
+if st.sidebar.button("➕ Agregar CEDI"):
+    st.session_state.cedis.append({
+        "nombre": cedi_nombre,
+        "coord": [cedi_lat, cedi_lon]
+    })
+
+# ============================================================
+# CLIENTES DINÁMICOS
+# ============================================================
+
+st.sidebar.subheader("📦 Agregar Cliente")
+
+cli_nombre = st.sidebar.text_input("Nombre Cliente")
+cli_demanda = st.sidebar.number_input("Demanda", value=100)
+cli_lat = st.sidebar.number_input("Lat Cliente", value=6.20)
+cli_lon = st.sidebar.number_input("Lon Cliente", value=-75.60)
+
+if st.sidebar.button("➕ Agregar Cliente"):
+    st.session_state.clientes.append({
+        "nombre": cli_nombre,
+        "demanda": cli_demanda,
+        "coord": [cli_lat, cli_lon]
+    })
+
+# ============================================================
+# MOSTRAR DATOS
+# ============================================================
+
+st.subheader("🏢 CEDIs")
+st.write(st.session_state.cedis)
+
+st.subheader("📦 Clientes")
+st.write(st.session_state.clientes)
+
+# ============================================================
+# VALIDACIÓN
+# ============================================================
+
+if len(st.session_state.clientes) == 0:
+    st.warning("Agrega al menos un cliente para optimizar rutas")
+    st.stop()
+
+# ============================================================
+# SELECCIÓN CEDI BASE
+# ============================================================
+
+cedi_base = st.sidebar.selectbox(
+    "CEDI base",
+    [c["nombre"] for c in st.session_state.cedis]
 )
 
 # ============================================================
-# TEXTOS
+# CONSTRUIR MODELO
 # ============================================================
 
-if idioma == "Español":
+coordenadas = []
+nombres = []
+demandas = []
 
-    TITULO = "🚛 Sistema Inteligente de Logística"
+# CEDIs
+for c in st.session_state.cedis:
+    coordenadas.append(c["coord"])
+    nombres.append(c["nombre"])
+    demandas.append(0)
 
-    SUBTITULO = "Optimización Avanzada de Transporte y Rutas"
+# Clientes
+for c in st.session_state.clientes:
+    coordenadas.append(c["coord"])
+    nombres.append(c["nombre"])
+    demandas.append(c["demanda"])
 
-    CONFIG = "⚙️ Configuración"
-
-    VEHICULOS = "Cantidad de Vehículos"
-
-    CAPACIDAD = "Capacidad Vehículo (kg)"
-
-    DEMANDAS = "📦 Demandas"
-
-    RESULTADOS = "📊 Resultados"
-
-    MAPA = "🗺️ Visualización de Rutas"
-
-    EXITO = "Optimización realizada correctamente"
-
-    ERROR = "No existe solución válida"
-
-else:
-
-    TITULO = "🚛 Logistic Intelligence System"
-
-    SUBTITULO = "Advanced Transportation & Route Optimization"
-
-    CONFIG = "⚙️ Configuration"
-
-    VEHICULOS = "Number of Vehicles"
-
-    CAPACIDAD = "Vehicle Capacity"
-
-    DEMANDAS = "📦 Demands"
-
-    RESULTADOS = "📊 Results"
-
-    MAPA = "🗺️ Route Visualization"
-
-    EXITO = "Optimization completed successfully"
-
-    ERROR = "No feasible solution"
-
-# ============================================================
-# TÍTULOS
-# ============================================================
-
-st.title(TITULO)
-
-st.subheader(SUBTITULO)
-
-# ============================================================
-# SIDEBAR
-# ============================================================
-
-st.sidebar.header(CONFIG)
-
-num_vehiculos = st.sidebar.number_input(
-
-    VEHICULOS,
-    min_value=1,
-    max_value=10,
-    value=2
-
-)
-
-capacidad = st.sidebar.number_input(
-
-    CAPACIDAD,
-    min_value=500,
-    max_value=10000,
-    value=4000
-
-)
-
-st.sidebar.subheader(DEMANDAS)
-
-demanda_poblado = st.sidebar.number_input(
-
-    "El Poblado",
-    value=1800
-
-)
-
-demanda_envigado = st.sidebar.number_input(
-
-    "Envigado",
-    value=1200
-
-)
-
-demanda_itagui = st.sidebar.number_input(
-
-    "Itagüí",
-    value=1500
-
-)
-
-demanda_bello = st.sidebar.number_input(
-
-    "Bello",
-    value=2200
-
-)
-
-demanda_laureles = st.sidebar.number_input(
-
-    "Laureles",
-    value=900
-
-)
-
-# ============================================================
-# DATOS
-# ============================================================
-
-coordenadas = [
-
-    [6.151, -75.615],
-    [6.210, -75.571],
-    [6.173, -75.583],
-    [6.172, -75.609],
-    [6.333, -75.558],
-    [6.243, -75.594]
-
-]
-
-nombres = [
-
-    "CEDI Sabaneta",
-    "El Poblado",
-    "Envigado",
-    "Itagüí",
-    "Bello",
-    "Laureles"
-
-]
-
-demandas = [
-
-    0,
-    demanda_poblado,
-    demanda_envigado,
-    demanda_itagui,
-    demanda_bello,
-    demanda_laureles
-
-]
+depot_index = nombres.index(cedi_base)
 
 # ============================================================
 # DISTANCIA
 # ============================================================
 
-def calcular_distancia(coord1, coord2):
+def distancia(a, b):
+    return int(math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2) * 111000)
 
-    lat1, lon1 = coord1
-
-    lat2, lon2 = coord2
-
-    return int(
-
-        math.sqrt(
-
-            (lat2 - lat1)**2 +
-            (lon2 - lon1)**2
-
-        ) * 111000
-
-    )
+# matriz
+matriz = [
+    [distancia(i, j) for j in coordenadas]
+    for i in coordenadas
+]
 
 # ============================================================
-# MATRIZ
-# ============================================================
-
-matriz = []
-
-for i in range(len(coordenadas)):
-
-    fila = []
-
-    for j in range(len(coordenadas)):
-
-        fila.append(
-
-            calcular_distancia(
-
-                coordenadas[i],
-                coordenadas[j]
-
-            )
-
-        )
-
-    matriz.append(fila)
-
-# ============================================================
-# MODELO
+# MODELO OR-TOOLS
 # ============================================================
 
 manager = pywrapcp.RoutingIndexManager(
-
     len(matriz),
     num_vehiculos,
-    0
-
+    depot_index
 )
 
 routing = pywrapcp.RoutingModel(manager)
 
-def callback_distancia(desde, hacia):
-
+def callback(i, j):
     return matriz[
-        manager.IndexToNode(desde)
+        manager.IndexToNode(i)
     ][
-        manager.IndexToNode(hacia)
+        manager.IndexToNode(j)
     ]
 
-transit_callback = routing.RegisterTransitCallback(
+transit = routing.RegisterTransitCallback(callback)
+routing.SetArcCostEvaluatorOfAllVehicles(transit)
 
-    callback_distancia
+def demand(i):
+    return demandas[manager.IndexToNode(i)]
 
-)
-
-routing.SetArcCostEvaluatorOfAllVehicles(
-
-    transit_callback
-
-)
-
-def callback_demanda(desde):
-
-    return demandas[
-        manager.IndexToNode(desde)
-    ]
-
-demand_callback = routing.RegisterUnaryTransitCallback(
-
-    callback_demanda
-
-)
+demand_callback = routing.RegisterUnaryTransitCallback(demand)
 
 routing.AddDimensionWithVehicleCapacity(
-
     demand_callback,
     0,
     [capacidad] * num_vehiculos,
     True,
-    'Capacity'
-
+    "Capacity"
 )
 
-parametros = pywrapcp.DefaultRoutingSearchParameters()
-
-parametros.first_solution_strategy = (
-
+params = pywrapcp.DefaultRoutingSearchParameters()
+params.first_solution_strategy = (
     routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
-
 )
 
-solucion = routing.SolveWithParameters(parametros)
+solution = routing.SolveWithParameters(params)
 
 # ============================================================
 # RESULTADOS
 # ============================================================
 
-if solucion:
+if solution:
 
-    st.success(EXITO)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-
-        st.metric(
-
-            "Total Demand",
-            f"{sum(demandas)} kg"
-
-        )
-
-    with col2:
-
-        st.metric(
-
-            "Total Capacity",
-            f"{capacidad * num_vehiculos} kg"
-
-        )
+    st.success("Optimización exitosa 🚀")
 
     resultados = []
 
-    fig, ax = plt.subplots(figsize=(10,8))
+    fig, ax = plt.subplots(figsize=(10, 7))
 
-    colores = [
+    colors = ["cyan", "lime", "orange", "magenta", "yellow"]
 
-        'cyan',
-        'lime',
-        'orange',
-        'magenta',
-        'yellow'
+    # nodos
+    for i, c in enumerate(coordenadas):
+        ax.scatter(c[1], c[0], s=200, color="white")
+        ax.text(c[1], c[0], nombres[i], color="white")
 
-    ]
+    for v in range(num_vehiculos):
 
-    for i, coord in enumerate(coordenadas):
-
-        ax.scatter(
-
-            coord[1],
-            coord[0],
-            s=250,
-            color='white'
-
-        )
-
-        ax.text(
-
-            coord[1],
-            coord[0],
-            nombres[i],
-            color='white'
-
-        )
-
-    for vehiculo in range(num_vehiculos):
-
-        index = routing.Start(vehiculo)
-
+        index = routing.Start(v)
         ruta = []
-
         carga = 0
-
         distancia_total = 0
 
         while not routing.IsEnd(index):
 
-            nodo = manager.IndexToNode(index)
+            node = manager.IndexToNode(index)
+            ruta.append(nombres[node])
+            carga += demandas[node]
 
-            ruta.append(nombres[nodo])
-
-            carga += demandas[nodo]
-
-            previo = index
-
-            index = solucion.Value(
-
-                routing.NextVar(index)
-
-            )
+            prev = index
+            index = solution.Value(routing.NextVar(index))
 
             distancia_total += routing.GetArcCostForVehicle(
-
-                previo,
-                index,
-                vehiculo
-
+                prev, index, v
             )
 
-        ruta.append("CEDI Sabaneta")
-
-        utilizacion = (
-
-            carga / capacidad
-
-        ) * 100
+        ruta.append(cedi_base)
 
         resultados.append({
-
-            "Vehículo": vehiculo + 1,
+            "Vehículo": v + 1,
             "Ruta": " → ".join(ruta),
-            "Carga (kg)": carga,
-            "Utilización %": round(utilizacion,2),
-            "Distancia (km)": round(distancia_total / 1000,2)
-
+            "Carga": carga,
+            "Utilización %": round((carga / capacidad) * 100, 2),
+            "Distancia km": round(distancia_total / 1000, 2)
         })
 
-        x = []
-        y = []
+        x, y = [], []
 
-        for punto in ruta[:-1]:
-
-            idx = nombres.index(punto)
-
+        for p in ruta[:-1]:
+            idx = nombres.index(p)
+            x.append(coordenadas[idx][1])
             y.append(coordenadas[idx][0])
 
-            x.append(coordenadas[idx][1])
-
-        x.append(coordenadas[0][1])
-        y.append(coordenadas[0][0])
+        x.append(coordenadas[depot_index][1])
+        y.append(coordenadas[depot_index][0])
 
         ax.plot(
-
-            x,
-            y,
+            x, y,
             linewidth=3,
-            color=colores[vehiculo % len(colores)],
-            label=f'Vehículo {vehiculo+1}'
-
+            color=colors[v % len(colors)],
+            label=f"Vehículo {v+1}"
         )
 
-    df = pd.DataFrame(resultados)
+    st.subheader("📊 Resultados")
+    st.dataframe(pd.DataFrame(resultados), use_container_width=True)
 
-    st.subheader(RESULTADOS)
-
-    st.dataframe(
-
-        df,
-        use_container_width=True
-
-    )
-
-    st.subheader(MAPA)
-
-    ax.set_facecolor('#0B1120')
-
-    fig.patch.set_facecolor('#0B1120')
-
-    ax.tick_params(colors='white')
-
+    st.subheader("🗺️ Rutas")
+    ax.set_facecolor("#0B1120")
+    fig.patch.set_facecolor("#0B1120")
     ax.legend()
-
     ax.grid(True)
 
     st.pyplot(fig)
 
-    # ============================================================
-    # FOOTER
-    # ============================================================
-
-    st.markdown("<br><br>", unsafe_allow_html=True)
-
-    st.markdown("""
-
-    <hr style="
-        border:1px solid #334155;
-        margin-top:40px;
-        margin-bottom:30px;
-    ">
-
-    <div style='
-        text-align:center;
-        padding:30px;
-        border-radius:20px;
-        background: linear-gradient(
-            135deg,
-            #111827,
-            #0F172A
-        );
-        border:1px solid #334155;
-    '>
-
-    <h2 style="
-        color:#60A5FA;
-        margin-bottom:25px;
-        font-size:30px;
-    ">
-
-    👨‍💻 Autores del Proyecto
-
-    </h2>
-
-    <p style="
-        color:white;
-        font-size:22px;
-        font-weight:bold;
-    ">
-
-    Miguel Ángel Monedero Aguado
-
-    </p>
-
-    <p style="
-        color:#CBD5E1;
-        font-size:18px;
-    ">
-
-    📞 31843741842
-
-    </p>
-
-    <br>
-
-    <p style="
-        color:white;
-        font-size:22px;
-        font-weight:bold;
-    ">
-
-    Cristhyan Felipe Uran España
-
-    </p>
-
-    <p style="
-        color:#CBD5E1;
-        font-size:18px;
-    ">
-
-    📞 3105482523
-
-    </p>
-
-    <br>
-
-    <p style="
-        color:#94A3B8;
-        font-size:15px;
-    ">
-
-    Sistema Inteligente de Logística •
-    Optimización de Rutas •
-    Python • Streamlit • OR-Tools
-
-    </p>
-
-    </div>
-
-    """, unsafe_allow_html=True)
-
 else:
-
-    st.error(ERROR)
-
+    st.error("No se encontró solución")
